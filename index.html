@@ -389,12 +389,18 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
             <button class="btn btn-sm btn-ghost doc-tb" data-v="stock_out" onclick="setDocT(this)">📤 จ่ายสินค้า</button>
           </div>
           <div class="cats-row" id="catRow">
-            <span class="tag-cat active" style="background:rgba(232,69,69,0.1);color:var(--red)" data-cat="อาหาร&เครื่องดื่ม" onclick="setCat(this)">🍜 อาหาร</span>
-            <span class="tag-cat" style="background:rgba(59,111,232,0.1);color:var(--blue)" data-cat="วัตถุดิบ" onclick="setCat(this)">🧪 วัตถุดิบ</span>
-            <span class="tag-cat" style="background:rgba(124,58,237,0.1);color:var(--purple)" data-cat="บรรจุภัณฑ์" onclick="setCat(this)">📦 บรรจุภัณฑ์</span>
-            <span class="tag-cat" style="background:rgba(45,158,107,0.1);color:var(--green)" data-cat="ค่าน้ำ/ไฟ" onclick="setCat(this)">⚡ ค่าน้ำ/ไฟ</span>
-            <span class="tag-cat" style="background:rgba(245,158,11,0.1);color:var(--orange)" data-cat="ค่าขนส่ง" onclick="setCat(this)">🚚 ขนส่ง</span>
-            <span class="tag-cat" style="background:rgba(26,23,20,0.07);color:var(--ink2)" data-cat="อื่นๆ" onclick="setCat(this)">📋 อื่นๆ</span>
+            <span class="tag-cat active" style="background:rgba(232,69,69,0.1);color:var(--red)" data-cat="01-อาหาร&เครื่องดื่ม" onclick="setCat(this)">🍳 อาหาร&เครื่องดื่ม</span>
+            <span class="tag-cat" style="background:rgba(59,111,232,0.1);color:var(--blue)" data-cat="02-ห้องพัก" onclick="setCat(this)">🛏️ ห้องพัก</span>
+            <span class="tag-cat" style="background:rgba(124,58,237,0.1);color:var(--purple)" data-cat="03-แม่บ้าน" onclick="setCat(this)">🧴 แม่บ้าน</span>
+            <span class="tag-cat" style="background:rgba(245,158,11,0.1);color:var(--orange)" data-cat="04-ซ่อมบำรุง" onclick="setCat(this)">🔧 ซ่อมบำรุง</span>
+            <span class="tag-cat" style="background:rgba(239,68,68,0.1);color:#dc2626" data-cat="05-เชื้อเพลิง" onclick="setCat(this)">⛽ เชื้อเพลิง</span>
+            <span class="tag-cat" style="background:rgba(234,179,8,0.1);color:#ca8a04" data-cat="06-สาธารณูปโภค" onclick="setCat(this)">💡 สาธารณูปโภค</span>
+            <span class="tag-cat" style="background:rgba(34,197,94,0.1);color:#16a34a" data-cat="07-สวน&สระ" onclick="setCat(this)">🌿 สวน&สระ</span>
+            <span class="tag-cat" style="background:rgba(14,165,233,0.1);color:#0284c7" data-cat="08-ขนส่ง" onclick="setCat(this)">🚗 ขนส่ง</span>
+            <span class="tag-cat" style="background:rgba(236,72,153,0.1);color:#db2777" data-cat="09-การตลาด" onclick="setCat(this)">📣 การตลาด</span>
+            <span class="tag-cat" style="background:rgba(99,102,241,0.1);color:#4f46e5" data-cat="10-ทั่วไป&สำนักงาน" onclick="setCat(this)">🏢 ทั่วไป&สำนักงาน</span>
+            <span class="tag-cat" style="background:rgba(20,184,166,0.1);color:#0d9488" data-cat="11-พนักงาน" onclick="setCat(this)">👥 พนักงาน</span>
+            <span class="tag-cat" style="background:rgba(26,23,20,0.07);color:var(--ink2)" data-cat="12-อื่นๆ" onclick="setCat(this)">📋 อื่นๆ</span>
           </div>
           <div class="flex-row">
             <button class="btn btn-md btn-orange" id="ocrBtn" onclick="runOCR()" disabled>
@@ -654,7 +660,7 @@ const DB = {
 };
 let CFG = JSON.parse(localStorage.getItem('st_cfg') || '{}');
 let docType = 'expense';
-let selCat = 'อาหาร&เครื่องดื่ม';
+let selCat = '01-อาหาร&เครื่องดื่ม';
 let adjTarget = null;
 let currentFile = null;
 let fileQueue = []; // multi-file queue
@@ -799,7 +805,7 @@ async function runOCR() {
   "docNo": "เลขที่เอกสาร",
   "vendor": "ชื่อร้านค้า/ผู้ขาย",
   "taxId": "เลขภาษี 13 หลัก หรือ ''",
-  "category": "หมวดหมู่ (อาหาร&เครื่องดื่ม/วัตถุดิบ/บรรจุภัณฑ์/ค่าน้ำ-ไฟ/ค่าขนส่ง/อื่นๆ)",
+  "category": "หมวดหมู่ที่เหมาะสม (01-อาหาร&เครื่องดื่ม / 02-ห้องพัก / 03-แม่บ้าน / 04-ซ่อมบำรุง / 05-เชื้อเพลิง / 06-สาธารณูปโภค / 07-สวน&สระ / 08-ขนส่ง / 09-การตลาด / 10-ทั่วไป&สำนักงาน / 11-พนักงาน / 12-อื่นๆ)",
   "hasVat": true,
   "items": [{ "name": "ชื่อสินค้า", "qty": 1, "unit": "หน่วย", "unitPrice": 0, "amount": 0 }],
   "subtotal": 0,
