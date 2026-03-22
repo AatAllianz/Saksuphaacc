@@ -594,6 +594,19 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
           <button class="btn btn-sm btn-danger" onclick="clearAll()">🗑️ ล้างข้อมูลทั้งหมด</button>
         </div>
       </div>
+      <div class="card section-gap">
+        <div class="card-header">
+          <div class="card-title">📖 พจนานุกรมแก้ชื่อสินค้า</div>
+          <button class="btn btn-xs btn-orange" onclick="addDictEntry()">+ เพิ่มคำแก้ไข</button>
+        </div>
+        <div class="card-body">
+          <div id="dictList"></div>
+          <div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.7">
+            💡 เมื่อ OCR อ่านชื่อผิด ให้ copy ชื่อที่ผิดจากช่อง <strong>rawName</strong> แล้วเพิ่มที่นี่<br>
+            ระบบจะแก้ไขอัตโนมัติทุกครั้งที่สแกน — สะสมไปเรื่อยๆ จนครบทุก SKU ของ Makro
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 </div>
@@ -662,6 +675,7 @@ let adjTarget = null;
 let currentFile = null;
 let fileQueue = [];
 let ocrResultQueue = [];
+let DICT = JSON.parse(localStorage.getItem('st_dict') || '[]'); // correction dictionary
 
 // ─── Navigation ──────────────────────────────────────────────────────────
 function goto(p) {
@@ -690,6 +704,7 @@ function loadConfig() {
   document.getElementById('cfg_ant').value = CFG.ant || '';
   document.getElementById('cfg_sheetId').value = CFG.sheetId || '';
   document.getElementById('cfg_sheetKey').value = CFG.sheetKey || '';
+  renderDict();
 }
 function updateApiDot() {
   const ok = !!CFG.ant;
@@ -698,6 +713,25 @@ function updateApiDot() {
 }
 updateApiDot();
 
+// ─── Image enhancement: binarize thermal print for better OCR ────────────
+function enhanceForOCR(canvas) {
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    // Grayscale
+    const gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+    // Boost contrast then threshold — makes faded thermal ink crisp black
+    const contrast = 1.8;
+    const factor = (259 * (contrast * 255 + 255)) / (255 * (259 - contrast * 255));
+    const enhanced = Math.min(255, Math.max(0, factor * (gray - 128) + 128));
+    const final = enhanced < 145 ? 0 : 255;
+    data[i] = data[i+1] = data[i+2] = final;
+    data[i+3] = 255;
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
 // ─── Image resize for OCR (flatbed scans can be very large) ──────────────
 async function resizeForOCR(file) {
   if (file.type === 'application/pdf') return file;
@@ -705,22 +739,83 @@ async function resizeForOCR(file) {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
-      const MAX = 1600;
+      const MAX = 2400;
+      const MIN_WIDTH = 1200; // upscale narrow receipts (Makro ~80mm wide)
       let { width: w, height: h } = img;
-      if (w <= MAX && h <= MAX) { URL.revokeObjectURL(url); resolve(file); return; }
-      const scale = MAX / Math.max(w, h);
+
+      if (w < MIN_WIDTH) {
+        // Upscale: narrow receipt, make text bigger for Claude
+        const scale = MIN_WIDTH / w;
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+      } else if (Math.max(w, h) > MAX) {
+        // Downscale: huge flatbed scan
+        const scale = MAX / Math.max(w, h);
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+      }
+
       const canvas = document.createElement('canvas');
-      canvas.width = Math.round(w * scale);
-      canvas.height = Math.round(h * scale);
-      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+      // Apply binarization for thermal print receipts
+      enhanceForOCR(canvas);
+
       canvas.toBlob(blob => {
         URL.revokeObjectURL(url);
         resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
-      }, 'image/jpeg', 0.92);
+      }, 'image/jpeg', 0.95); // higher quality for small text
     };
     img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
     img.src = url;
   });
+}
+
+// ─── Correction dictionary helpers ──────────────────────────────────────
+function applyDict(items) {
+  if (!DICT.length) return items;
+  return items.map(item => {
+    let name = item.name || '';
+    let rawName = item.rawName || '';
+    for (const { wrong, correct } of DICT) {
+      if (name.includes(wrong))    name    = name.replace(wrong, correct);
+      if (rawName.includes(wrong)) rawName = rawName.replace(wrong, correct);
+    }
+    return { ...item, name, rawName };
+  });
+}
+
+function renderDict() {
+  const el = document.getElementById('dictList');
+  if (!el) return;
+  el.innerHTML = DICT.length
+    ? DICT.map((d, i) => `
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--surface2)">
+          <span style="font-family:var(--mono);font-size:11px;color:var(--red);flex:1;word-break:break-all">${d.wrong}</span>
+          <span style="color:var(--ink3);flex-shrink:0">→</span>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--green);flex:1;word-break:break-all">${d.correct}</span>
+          <button class="btn btn-xs btn-danger" onclick="delDict(${i})">🗑️</button>
+        </div>`).join('')
+    : '<div style="font-size:12px;color:var(--ink3)">ยังไม่มีรายการ — เพิ่มหลังจาก OCR อ่านชื่อผิด</div>';
+}
+
+function addDictEntry() {
+  const wrong = prompt('ชื่อที่ Claude อ่านผิด (copy จากช่อง rawName หรือ name ในฟอร์ม):');
+  if (!wrong || !wrong.trim()) return;
+  const correct = prompt('ชื่อที่ถูกต้อง:');
+  if (!correct || !correct.trim()) return;
+  DICT.push({ wrong: wrong.trim(), correct: correct.trim() });
+  localStorage.setItem('st_dict', JSON.stringify(DICT));
+  renderDict();
+  toast('✅ เพิ่มคำแก้ไขแล้ว', 's');
+}
+
+function delDict(i) {
+  DICT.splice(i, 1);
+  localStorage.setItem('st_dict', JSON.stringify(DICT));
+  renderDict();
+  toast('🗑️ ลบแล้ว', 'i');
 }
 
 // ─── Safe JSON parser with validation ────────────────────────────────────
@@ -762,6 +857,9 @@ function parseOCRResponse(txt) {
   if (parsed._itemCount && parsed.items.length < parsed._itemCount * 0.85) {
     warnings.push(`⚠️ AI อ่านได้ ${parsed.items.length} รายการ แต่บิลมี ${parsed._itemCount} รายการ — อาจตัดทอนเนื่องจากบิลยาว`);
   }
+
+  // Apply correction dictionary
+  parsed.items = applyDict(parsed.items);
 
   parsed._warnings = warnings;
   return parsed;
@@ -857,9 +955,14 @@ function setCat(el) {
 
 // ─── IMPROVED OCR PROMPT ─────────────────────────────────────────────────
 function buildPrompt(typeLabel) {
+  const dictSection = DICT.length
+    ? '\n═══ พจนานุกรมแก้ไขชื่อสินค้า (ใช้ทันที ก่อน output) ═══\n' +
+      DICT.map(d => `"${d.wrong}" → แก้เป็น "${d.correct}"`).join('\n') + '\n'
+    : '';
+
   return `คุณเป็น OCR Expert เชี่ยวชาญบิลและใบเสร็จไทย-อังกฤษ สำหรับโรงแรม/รีสอร์ท
 ประเภทเอกสาร: ${typeLabel}
-
+${dictSection}
 ═══ กฎชื่อสินค้า (สำคัญที่สุด) ═══
 - คัดลอกชื่อสินค้าจากบิลตรงๆ ห้ามแปล ห้ามขยายความ ห้ามเดา
 - ถ้าบิลเขียน "BKP LA.PAENGKAI 1KG" ให้ใส่ชื่อนั้นทั้งหมด ไม่ใช่ "ไก่ย่างแบงค็อก"
@@ -867,6 +970,8 @@ function buildPrompt(typeLabel) {
 - ใส่ชื่อทั้งหมดใน "rawName" (ตามบิลทุกตัวอักษร) และ "name" (เหมือนกับ rawName)
   ถูก ✅: rawName="MAMA INST NOOD 55G", name="MAMA INST NOOD 55G"
   ผิด ❌: name="มาม่าเส้น" (แปลเอง / ขยายความเอง)
+- ถ้าอ่านตัวอักษรไม่ชัดเนื่องจาก thermal print เลือน ให้ใส่ [?] แทนตัวที่อ่านไม่ออก
+  เช่น: "ARO แอลก[?]ฮอล์ 24กรัม" ดีกว่าเดาชื่อผิดทั้งหมด
 
 ═══ กฎการอ่านตัวเลข (สำคัญมาก) ═══
 - amount ของแต่ละรายการ = qty × unitPrice เสมอ ตรวจสอบให้ถูกต้องก่อน output
@@ -876,8 +981,10 @@ function buildPrompt(typeLabel) {
 
 ═══ กฎการอ่านตามประเภทบิล ═══
 
-【บิล MAKRO】
+【บิล MAKRO — thermal print】
 - ชื่อสินค้า: คัดลอกจาก ARTICLE DESCRIPTION ตรงๆ ทุกตัวอักษร
+- %ARO หรือ $ARO ที่ขึ้นต้น = ARO (เครื่องหมาย % หรือ $ คือ logo symbol ของ Makro ไม่ใช่เปอร์เซ็นต์)
+- ตัวพิมพ์เลือน: ใส่ [?] แทนตัวที่อ่านไม่ออก อย่าเดา
 - จำนวน: อ่านจากคอลัมน์ "QUANTITY OR WEIGHT" (ซ้ายสุด) ไม่ใช่ UNIT PACKS
 - ราคา/หน่วย: อ่านจากคอลัมน์ "PACK PRICE" หารด้วย UNIT PACKS
 - ยอดรายการ: อ่านจากคอลัมน์ "VALUE INCLUDED VAT" (ขวาสุด)
@@ -886,8 +993,9 @@ function buildPrompt(typeLabel) {
 - นับจำนวนบรรทัดสินค้าทั้งหมด แล้วใส่ใน "_itemCount"
 
 ตัวอย่าง Makro (ชื่อต้องเหมือนบิลทุกตัวอักษร):
-ARTICLE="MAMA INST NOOD 55G", QUANTITY=2, PACK PRICE=42.00, UNIT PACKS=1, VALUE=84.00
-→ rawName="MAMA INST NOOD 55G", name="MAMA INST NOOD 55G", qty=2, unitPrice=42, amount=84 ✅
+ARTICLE="%ARO แอกอฮอร์แข็งชนิดถ้วย24กรัม1X50", QUANTITY=2, PACK PRICE=190.00, UNIT PACKS=1, VALUE=380.00
+→ rawName="%ARO แอกอฮอร์แข็งชนิดถ้วย24กรัม1X50", name="%ARO แอกอฮอร์แข็งชนิดถ้วย24กรัม1X50", qty=2, unitPrice=190, amount=380 ✅
+ถ้าอ่านไม่ชัด: rawName="%ARO แอก[?]ฮอร์แข็งชนิดถ้วย24กรัม1X50" ✅ (ดีกว่าเดาผิด)
 
 【ใบกำกับภาษี / Invoice ทั่วไป】
 - คัดลอกชื่อสินค้าจากบิลตรงๆ
