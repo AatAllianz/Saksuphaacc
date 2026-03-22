@@ -825,49 +825,46 @@ function enhanceFlatbed(canvas) {
 
 async function resizeForOCR(file) {
   if (file.type === 'application/pdf') return file;
+
   return new Promise(resolve => {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
-      // Flatbed scans: cap at 3200px (higher than before — more detail for Thai text)
-      // Phone captures: upscale narrow receipts to at least 1200px wide
-      const MAX_FLATBED = 3200;
-      const MAX_PHONE   = 2400;
-      const MIN_WIDTH   = 1200;
-      let { width: w, height: h } = img;
+      const { width: w, height: h } = img;
       const isPhone = isThermalPhotoCapture(w, h);
 
-      if (isPhone && w < MIN_WIDTH) {
-        const scale = MIN_WIDTH / w;
-        w = Math.round(w * scale);
-        h = Math.round(h * scale);
-      } else if (!isPhone && Math.max(w, h) > MAX_FLATBED) {
-        const scale = MAX_FLATBED / Math.max(w, h);
-        w = Math.round(w * scale);
-        h = Math.round(h * scale);
-      } else if (isPhone && Math.max(w, h) > MAX_PHONE) {
-        const scale = MAX_PHONE / Math.max(w, h);
-        w = Math.round(w * scale);
-        h = Math.round(h * scale);
+      // Flatbed scans: send original file untouched — any canvas processing
+      // adds JPEG recompression which degrades text Claude needs to read.
+      // Only process phone captures which need upscaling + binarization.
+      if (!isPhone) {
+        URL.revokeObjectURL(url);
+        resolve(file);
+        return;
+      }
+
+      // Phone thermal capture: upscale narrow receipts + binarize faded ink
+      const MAX_PHONE = 2400;
+      const MIN_WIDTH = 1200;
+      let pw = w, ph = h;
+      if (pw < MIN_WIDTH) {
+        const scale = MIN_WIDTH / pw;
+        pw = Math.round(pw * scale);
+        ph = Math.round(ph * scale);
+      } else if (Math.max(pw, ph) > MAX_PHONE) {
+        const scale = MAX_PHONE / Math.max(pw, ph);
+        pw = Math.round(pw * scale);
+        ph = Math.round(ph * scale);
       }
 
       const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.width = pw; canvas.height = ph;
+      canvas.getContext('2d').drawImage(img, 0, 0, pw, ph);
+      enhanceThermalPhoto(canvas);
 
-      // Only binarize phone-captured thermal photos — NOT flatbed scans
-      if (isPhone) {
-        enhanceThermalPhoto(canvas);
-      } else {
-        enhanceFlatbed(canvas);
-      }
-
-      // Higher JPEG quality for flatbed (more detail to preserve)
-      const quality = isPhone ? 0.92 : 0.97;
       canvas.toBlob(blob => {
         URL.revokeObjectURL(url);
         resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
-      }, 'image/jpeg', quality);
+      }, 'image/jpeg', 0.92);
     };
     img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
     img.src = url;
