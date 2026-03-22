@@ -28,7 +28,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-height: 100vh; }
 
-/* Layout */
 .shell { display: flex; min-height: 100vh; }
 .sidebar {
   width: 220px; background: var(--ink); color: #fff;
@@ -67,12 +66,10 @@ body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-h
 .page { display: none; padding: 28px 32px; }
 .page.active { display: block; }
 
-/* Page Header */
 .page-header { margin-bottom: 24px; display: flex; align-items: flex-start; justify-content: space-between; }
 .page-title { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
 .page-sub { font-size: 13px; color: var(--ink2); margin-top: 3px; }
 
-/* Buttons */
 .btn {
   border: none; border-radius: 8px; cursor: pointer;
   font-family: var(--sans); font-weight: 600;
@@ -93,7 +90,6 @@ body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-h
 .btn-danger:hover { background: rgba(232,69,69,0.18); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-/* Cards */
 .card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); box-shadow: var(--shadow);
@@ -105,7 +101,6 @@ body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-h
 .card-title { font-size: 13px; font-weight: 700; letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px; }
 .card-body { padding: 20px; }
 
-/* Stat Cards */
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
 .stat-card {
   background: var(--surface); border: 1px solid var(--border);
@@ -120,7 +115,6 @@ body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-h
 .stat-value.blue { color: var(--blue); }
 .stat-change { font-size: 11px; color: var(--ink3); margin-top: 4px; }
 
-/* Settings bar */
 .settings-bar {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 16px 20px;
@@ -136,8 +130,6 @@ body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-h
 .sf input:focus, .sf select:focus { border-color: var(--blue); }
 .sf input::placeholder { color: var(--ink3); }
 
-/* Upload area */
-.upload-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 20px; }
 .upload-zone {
   border: 2px dashed var(--border); border-radius: var(--radius);
   padding: 36px 20px; text-align: center; cursor: pointer;
@@ -153,15 +145,13 @@ body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-h
   font-size: 12px; color: var(--orange); font-weight: 600; pointer-events: none;
 }
 
-.preview-box { min-height: 200px; border-radius: var(--radius); overflow: hidden; position: relative; }
-.preview-box img { width: 100%; height: 200px; object-fit: contain; background: var(--surface2); border-radius: var(--radius); }
-.preview-box .pdf-badge {
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 30px 20px; text-align: center; height: 200px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+/* OCR Warning Banner */
+.ocr-warning {
+  background: rgba(232,69,69,0.08); border: 1px solid rgba(232,69,69,0.3);
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
+  font-size: 12px; color: var(--red); font-weight: 600; display: none;
 }
-.preview-box .pdf-badge span { font-size: 36px; }
-.preview-box .pdf-badge p { font-size: 12px; color: var(--ink2); font-family: var(--mono); }
+.ocr-warning.show { display: block; }
 
 /* OCR Result area */
 .ocr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -183,29 +173,28 @@ body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-h
 .tag-cat.active { border-color: currentColor; }
 .cats-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
 
-/* Items table */
+/* Items table — now with rawName subtitle */
 .items-tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
 .items-tbl th { text-align: left; font-size: 10px; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 8px; border-bottom: 2px solid var(--border); }
-.items-tbl td { padding: 5px 4px; border-bottom: 1px solid var(--surface2); }
+.items-tbl td { padding: 5px 4px; border-bottom: 1px solid var(--surface2); vertical-align: top; }
 .items-tbl td input {
   width: 100%; background: transparent; border: 1px solid transparent;
   border-radius: 5px; padding: 6px 7px; color: var(--ink);
   font-family: var(--sans); font-size: 12px; outline: none; transition: all 0.15s;
 }
 .items-tbl td input:focus, .items-tbl tr:hover td input { background: var(--surface2); border-color: var(--border); }
+.raw-name-tag { font-size: 9px; color: var(--ink3); font-family: var(--mono); padding: 1px 5px; margin-top: 2px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
 .btn-row-del { background: none; border: none; color: var(--ink3); cursor: pointer; font-size: 14px; transition: color 0.15s; padding: 4px; }
 .btn-row-del:hover { color: var(--red); }
 .btn-add-row { width: 100%; margin-top: 8px; padding: 8px; background: transparent; border: 1.5px dashed var(--border); border-radius: 8px; color: var(--ink3); font-size: 12px; cursor: pointer; transition: all 0.18s; font-family: var(--sans); }
 .btn-add-row:hover { border-color: var(--orange); color: var(--orange); }
 
-/* Summary */
 .sum-box { background: var(--surface2); border-radius: 10px; padding: 14px 16px; margin-top: 12px; }
 .sum-row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; color: var(--ink2); }
 .sum-row.total { color: var(--ink); font-weight: 700; font-size: 16px; border-top: 1px solid var(--border); margin-top: 6px; padding-top: 8px; }
 .sum-row .amt { font-family: var(--mono); }
 .sum-row.total .amt { color: var(--red); }
 
-/* Table (data list) */
 .data-tbl { width: 100%; border-collapse: collapse; }
 .data-tbl th { text-align: left; font-size: 10px; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.6px; padding: 10px 12px; border-bottom: 2px solid var(--border); white-space: nowrap; }
 .data-tbl td { padding: 11px 12px; border-bottom: 1px solid var(--surface2); font-size: 13px; vertical-align: middle; }
@@ -218,7 +207,6 @@ body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-h
 .chip-blue { background: rgba(59,111,232,0.1); color: var(--blue); }
 .chip-gray { background: var(--surface2); color: var(--ink2); }
 
-/* Stock */
 .stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
 .stock-card {
   background: var(--surface); border: 1px solid var(--border);
@@ -239,7 +227,6 @@ body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-h
 .stock-bar.ok { background: var(--green); }
 .stock-actions { display: flex; gap: 6px; margin-top: 12px; }
 
-/* Modal */
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(26,23,20,0.5);
   backdrop-filter: blur(3px); z-index: 999;
@@ -258,11 +245,9 @@ body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-h
 .modal-body { padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; }
 .modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
 
-/* Spinner */
 .spin { animation: rotate 0.7s linear infinite; display: inline-block; }
 @keyframes rotate { to { transform: rotate(360deg); } }
 
-/* Toast */
 .toast {
   position: fixed; bottom: 24px; right: 24px; z-index: 9999;
   padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 600;
@@ -274,17 +259,22 @@ body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-h
 .toast.e { background: #fff; border: 1px solid var(--red); color: var(--red); box-shadow: var(--shadow-lg); }
 .toast.i { background: #fff; border: 1px solid var(--blue); color: var(--blue); box-shadow: var(--shadow-lg); }
 
-/* Empty state */
 .empty { text-align: center; padding: 60px 20px; color: var(--ink3); }
 .empty-icon { font-size: 40px; margin-bottom: 12px; }
 .empty-text { font-size: 14px; }
 
-/* Responsive */
+/* Duplicate warning */
+.dup-warning {
+  background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.4);
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
+  font-size: 12px; color: #92620a; font-weight: 600; display: none;
+}
+.dup-warning.show { display: block; }
+
 @media(max-width: 768px) {
   .sidebar { display: none; }
   .stats-row { grid-template-columns: repeat(2, 1fr); }
-  .upload-wrap { grid-template-columns: 1fr; }
-  .ocr-grid { grid-template-columns: 1fr; }
+  .ocr-grid { grid-column: 1fr; }
   .page { padding: 16px; }
 }
 
@@ -298,7 +288,6 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
 </head>
 <body>
 <div class="shell">
-  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-logo">
       <h1>Stock<span>Track</span></h1>
@@ -333,12 +322,11 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
         <div class="stat-card"><div class="stat-label">สินค้าในสต๊อก</div><div class="stat-value blue" id="st-items">0</div><div class="stat-change">SKU ทั้งหมด</div></div>
         <div class="stat-card"><div class="stat-label">สต๊อกต่ำ</div><div class="stat-value orange" id="st-low">0</div><div class="stat-change">ต้องสั่งซื้อ</div></div>
       </div>
-
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 18px;">
         <div class="card">
           <div class="card-header"><div class="card-title">💸 รายจ่ายล่าสุด</div><button class="btn btn-xs btn-ghost" onclick="goto('expenses')">ดูทั้งหมด →</button></div>
           <div class="card-body" style="padding:0">
-            <table class="data-tbl" id="dash-exp-tbl">
+            <table class="data-tbl">
               <thead><tr><th>วันที่</th><th>รายการ</th><th>หมวด</th><th style="text-align:right">จำนวน</th></tr></thead>
               <tbody id="dash-exp-body"><tr><td colspan="4"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">ยังไม่มีรายการ</div></div></td></tr></tbody>
             </table>
@@ -359,7 +347,6 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
         <div><div class="page-title">📸 สแกนบิล / ใบเสร็จ</div><div class="page-sub">ถ่ายภาพหรืออัปโหลด แล้วให้ AI อ่านข้อมูลอัตโนมัติ</div></div>
       </div>
 
-      <!-- Upload -->
       <div class="section-gap">
         <div class="upload-zone" id="uploadZone" style="margin-bottom:12px">
           <input type="file" id="fileInput" accept="image/*,.pdf" multiple />
@@ -374,11 +361,9 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
           <span id="fileCountBadge" style="display:none;font-size:12px;font-weight:700;color:var(--orange)"></span>
           <button class="btn btn-sm btn-danger" id="clearFilesBtn" style="display:none" onclick="clearAllFiles()">🗑️ ล้างทั้งหมด</button>
         </div>
-        <!-- Multi-file preview grid -->
-        <div id="multiPreviewGrid" style="display:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:14px"></div>
+        <div id="multiPreviewGrid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:14px"></div>
       </div>
 
-      <!-- Type + Category -->
       <div class="card section-gap">
         <div class="card-header"><div class="card-title">🏷️ ประเภทเอกสาร & หมวดหมู่</div></div>
         <div class="card-body">
@@ -407,7 +392,6 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
               <span id="ocrIcon">🔍</span><span id="ocrTxt">วิเคราะห์ด้วย AI</span>
             </button>
             <span id="ocrStatus" class="text-sm"></span>
-            <!-- Batch progress -->
             <div id="batchProgress" style="display:none;flex:1">
               <div style="font-size:11px;color:var(--ink2);margin-bottom:4px" id="batchLabel">กำลังประมวลผล...</div>
               <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
@@ -425,6 +409,10 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
           <button class="btn btn-xs btn-ghost" onclick="toggleRaw()">JSON</button>
         </div>
         <div class="card-body">
+          <!-- OCR warning banners -->
+          <div class="ocr-warning" id="ocrWarning"></div>
+          <div class="dup-warning" id="dupWarning"></div>
+
           <div class="ocr-grid" style="margin-bottom:16px">
             <div class="form-field">
               <label>วันที่</label>
@@ -448,9 +436,19 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
             </div>
           </div>
           <hr class="divider">
-          <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px">รายการสินค้า</div>
+          <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px">
+            รายการสินค้า
+            <span id="itemCountInfo" style="font-weight:400;color:var(--ink3);margin-left:8px;text-transform:none;letter-spacing:0"></span>
+          </div>
           <table class="items-tbl">
-            <thead><tr><th style="width:38%">รายการ</th><th style="width:13%">จำนวน</th><th style="width:13%">หน่วย</th><th style="width:18%">ราคา/หน่วย</th><th style="width:14%">รวม</th><th style="width:4%"></th></tr></thead>
+            <thead><tr>
+              <th style="width:36%">รายการ (ชื่อบนบิล)</th>
+              <th style="width:12%">จำนวน</th>
+              <th style="width:12%">หน่วย</th>
+              <th style="width:17%">ราคา/หน่วย</th>
+              <th style="width:13%">รวม</th>
+              <th style="width:4%"></th>
+            </tr></thead>
             <tbody id="itemsBody"></tbody>
           </table>
           <button class="btn-add-row" onclick="addRow()">+ เพิ่มรายการ</button>
@@ -463,28 +461,31 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
             <label>หมายเหตุ</label>
             <input type="text" id="r_note" placeholder="บันทึกเพิ่มเติม..." />
           </div>
-          <div id="rawJson" style="display:none;margin-top:12px;background:var(--surface2);border-radius:8px;padding:12px;font-family:var(--mono);font-size:11px;color:var(--ink2);white-space:pre-wrap;max-height:140px;overflow-y:auto"></div>
+          <div id="rawJson" style="display:none;margin-top:12px;background:var(--surface2);border-radius:8px;padding:12px;font-family:var(--mono);font-size:11px;color:var(--ink2);white-space:pre-wrap;max-height:200px;overflow-y:auto"></div>
           <div class="flex-row" style="margin-top:16px">
             <button class="btn btn-md btn-green" onclick="saveRecord()">💾 บันทึกลง Sheet</button>
             <button class="btn btn-md btn-ghost" onclick="resetOCR()">🗑️ ล้างข้อมูล</button>
           </div>
         </div>
       </div>
-      <!-- Batch Queue Results -->
+
+      <!-- Batch Queue -->
       <div id="batchQueue" style="display:none" class="section-gap">
         <div class="card">
           <div class="card-header">
             <div class="card-title">📋 คิวบิลที่รออยู่</div>
             <div style="display:flex;gap:8px;align-items:center">
               <span id="queueCount" style="font-size:12px;color:var(--ink2)"></span>
+              <span id="queueTotal" style="font-size:13px;font-weight:700;font-family:var(--mono);color:var(--red)"></span>
               <button class="btn btn-sm btn-green" onclick="saveAllQueue()">💾 บันทึกทั้งหมด</button>
             </div>
           </div>
           <div id="queueList" style="padding:12px;display:flex;flex-direction:column;gap:10px"></div>
         </div>
       </div>
-
     </div>
+
+    <!-- ── EXPENSES ── -->
     <div class="page" id="page-expenses">
       <div class="page-header">
         <div><div class="page-title">💸 รายจ่ายทั้งหมด</div><div class="page-sub" id="exp-sub">0 รายการ</div></div>
@@ -544,13 +545,9 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
           <table class="data-tbl">
             <thead>
               <tr>
-                <th>วันที่/เวลา</th>
-                <th>สินค้า</th>
-                <th>ประเภท</th>
-                <th style="text-align:right">จำนวน</th>
-                <th style="text-align:right">คงเหลือ</th>
-                <th>ผู้บันทึก/หมายเหตุ</th>
-                <th>อ้างอิง</th>
+                <th>วันที่/เวลา</th><th>สินค้า</th><th>ประเภท</th>
+                <th style="text-align:right">จำนวน</th><th style="text-align:right">คงเหลือ</th>
+                <th>ผู้บันทึก/หมายเหตุ</th><th>อ้างอิง</th>
               </tr>
             </thead>
             <tbody id="logBody">
@@ -663,8 +660,8 @@ let docType = 'expense';
 let selCat = '01-อาหาร&เครื่องดื่ม';
 let adjTarget = null;
 let currentFile = null;
-let fileQueue = []; // multi-file queue
-let ocrResultQueue = []; // processed results
+let fileQueue = [];
+let ocrResultQueue = [];
 
 // ─── Navigation ──────────────────────────────────────────────────────────
 function goto(p) {
@@ -701,14 +698,92 @@ function updateApiDot() {
 }
 updateApiDot();
 
+// ─── Image resize for OCR (flatbed scans can be very large) ──────────────
+async function resizeForOCR(file) {
+  if (file.type === 'application/pdf') return file;
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const MAX = 1600;
+      let { width: w, height: h } = img;
+      if (w <= MAX && h <= MAX) { URL.revokeObjectURL(url); resolve(file); return; }
+      const scale = MAX / Math.max(w, h);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(w * scale);
+      canvas.height = Math.round(h * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(blob => {
+        URL.revokeObjectURL(url);
+        resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
+      }, 'image/jpeg', 0.92);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+
+// ─── Safe JSON parser with validation ────────────────────────────────────
+function parseOCRResponse(txt) {
+  // Strip markdown fences Claude sometimes adds
+  const clean = txt.replace(/```json|```/g, '').trim();
+  const m = clean.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error('ไม่พบ JSON ในผลลัพธ์');
+
+  let parsed;
+  try { parsed = JSON.parse(m[0]); }
+  catch(e) { throw new Error('JSON ไม่ถูกต้อง: ' + e.message); }
+
+  // Coerce types
+  if (!Array.isArray(parsed.items)) parsed.items = [];
+  parsed.total    = Number(parsed.total)    || 0;
+  parsed.subtotal = Number(parsed.subtotal) || 0;
+  parsed.vat      = Number(parsed.vat)      || 0;
+
+  // Coerce item numbers
+  parsed.items = parsed.items.map(it => ({
+    ...it,
+    qty:       Number(it.qty)       || 0,
+    unitPrice: Number(it.unitPrice) || 0,
+    amount:    Number(it.amount)    || 0,
+    rawName:   it.rawName || it.name || '',
+  }));
+
+  // Cross-check: sum of item amounts vs declared total
+  const warnings = [];
+  if (parsed.total > 0 && parsed.items.length > 0) {
+    const calcSum = parsed.items.reduce((s, i) => s + i.amount, 0);
+    if (Math.abs(calcSum - parsed.total) > 1) {
+      warnings.push(`⚠️ ยอดรายการรวม (฿${fmt(calcSum)}) ไม่ตรงกับ total ในบิล (฿${fmt(parsed.total)}) — กรุณาตรวจสอบ`);
+    }
+  }
+
+  // Item count cross-check
+  if (parsed._itemCount && parsed.items.length < parsed._itemCount * 0.85) {
+    warnings.push(`⚠️ AI อ่านได้ ${parsed.items.length} รายการ แต่บิลมี ${parsed._itemCount} รายการ — อาจตัดทอนเนื่องจากบิลยาว`);
+  }
+
+  parsed._warnings = warnings;
+  return parsed;
+}
+
+// ─── Duplicate detection ─────────────────────────────────────────────────
+function checkDuplicate(docNo, vendor) {
+  if (!docNo) return null;
+  return DB.expenses.find(e =>
+    e.docNo && e.docNo === docNo &&
+    e.vendor && e.vendor.toLowerCase() === (vendor || '').toLowerCase()
+  ) || null;
+}
+
 // ─── File / Upload (Multi) ────────────────────────────────────────────────
 const fileInput = document.getElementById('fileInput');
-const camInput = document.getElementById('camInput');
-const zone = document.getElementById('uploadZone');
+const camInput  = document.getElementById('camInput');
+const zone      = document.getElementById('uploadZone');
 
 fileInput.addEventListener('change', e => addFiles(Array.from(e.target.files)));
-camInput.addEventListener('change', e => addFiles(Array.from(e.target.files)));
-zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+camInput.addEventListener('change',  e => addFiles(Array.from(e.target.files)));
+zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag'); });
 zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
 zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag'); addFiles(Array.from(e.dataTransfer.files)); });
 function trigCam() { camInput.click(); }
@@ -723,8 +798,8 @@ function addFiles(files) {
 }
 
 function renderFileQueue() {
-  const grid = document.getElementById('multiPreviewGrid');
-  const badge = document.getElementById('fileCountBadge');
+  const grid     = document.getElementById('multiPreviewGrid');
+  const badge    = document.getElementById('fileCountBadge');
   const clearBtn = document.getElementById('clearFilesBtn');
   if (!fileQueue.length) {
     grid.style.display = 'none'; badge.style.display = 'none'; clearBtn.style.display = 'none';
@@ -736,7 +811,7 @@ function renderFileQueue() {
   clearBtn.style.display = 'inline-flex';
   grid.innerHTML = fileQueue.map((f, i) => {
     const isPdf = f.type === 'application/pdf';
-    const url = isPdf ? null : URL.createObjectURL(f);
+    const url   = isPdf ? null : URL.createObjectURL(f);
     return `
       <div style="position:relative;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface2)">
         ${isPdf
@@ -757,8 +832,7 @@ function removeFile(i) {
 }
 
 function clearAllFiles() {
-  fileQueue = [];
-  ocrResultQueue = [];
+  fileQueue = []; ocrResultQueue = [];
   renderFileQueue();
   document.getElementById('ocrBtn').disabled = true;
   document.getElementById('batchQueue').style.display = 'none';
@@ -766,9 +840,7 @@ function clearAllFiles() {
   fileInput.value = '';
 }
 
-// Keep backward compat
 function loadFile(file) { addFiles([file]); }
-
 
 // ─── OCR ──────────────────────────────────────────────────────────────────
 function setDocT(el) {
@@ -781,6 +853,89 @@ function setCat(el) {
   el.classList.add('active');
   selCat = el.dataset.cat;
   document.getElementById('r_cat').value = selCat;
+}
+
+// ─── IMPROVED OCR PROMPT ─────────────────────────────────────────────────
+function buildPrompt(typeLabel) {
+  return `คุณเป็น OCR Expert เชี่ยวชาญบิลและใบเสร็จไทย-อังกฤษ สำหรับโรงแรม/รีสอร์ท
+ประเภทเอกสาร: ${typeLabel}
+
+═══ กฎชื่อสินค้า (สำคัญที่สุด) ═══
+- คัดลอกชื่อสินค้าจากบิลตรงๆ ห้ามแปล ห้ามขยายความ ห้ามเดา
+- ถ้าบิลเขียน "BKP LA.PAENGKAI 1KG" ให้ใส่ชื่อนั้นทั้งหมด ไม่ใช่ "ไก่ย่างแบงค็อก"
+- ถ้าบิลเขียน "MAMA INST NOOD 55G" ให้ใส่ชื่อนั้นทั้งหมด ไม่ใช่ "มาม่าเส้นแห้ง"
+- ใส่ชื่อทั้งหมดใน "rawName" (ตามบิลทุกตัวอักษร) และ "name" (เหมือนกับ rawName)
+  ถูก ✅: rawName="MAMA INST NOOD 55G", name="MAMA INST NOOD 55G"
+  ผิด ❌: name="มาม่าเส้น" (แปลเอง / ขยายความเอง)
+
+═══ กฎการอ่านตัวเลข (สำคัญมาก) ═══
+- amount ของแต่ละรายการ = qty × unitPrice เสมอ ตรวจสอบให้ถูกต้องก่อน output
+- total ต้องตรงกับยอดที่จ่ายจริงในบิล (บรรทัด "รวมเงิน" / "ยอดชำระ" / "TOTAL" ด้านล่างสุด)
+- ห้ามคำนวณ total เอง ให้อ่านจากบิลเท่านั้น
+- subtotal = ยอดก่อน VAT, vat = ภาษีมูลค่าเพิ่ม, total = subtotal + vat
+
+═══ กฎการอ่านตามประเภทบิล ═══
+
+【บิล MAKRO】
+- ชื่อสินค้า: คัดลอกจาก ARTICLE DESCRIPTION ตรงๆ ทุกตัวอักษร
+- จำนวน: อ่านจากคอลัมน์ "QUANTITY OR WEIGHT" (ซ้ายสุด) ไม่ใช่ UNIT PACKS
+- ราคา/หน่วย: อ่านจากคอลัมน์ "PACK PRICE" หารด้วย UNIT PACKS
+- ยอดรายการ: อ่านจากคอลัมน์ "VALUE INCLUDED VAT" (ขวาสุด)
+- ยอดรวม: อ่านจาก "รวมเงิน" / "NET AMOUNT" บรรทัดล่างสุด ไม่ใช่ LEGAL AMOUNT
+- เลขที่: อ่านจาก "RECEIPT NO." ไม่ใช่ REF NO. หรือ TRACE
+- นับจำนวนบรรทัดสินค้าทั้งหมด แล้วใส่ใน "_itemCount"
+
+ตัวอย่าง Makro (ชื่อต้องเหมือนบิลทุกตัวอักษร):
+ARTICLE="MAMA INST NOOD 55G", QUANTITY=2, PACK PRICE=42.00, UNIT PACKS=1, VALUE=84.00
+→ rawName="MAMA INST NOOD 55G", name="MAMA INST NOOD 55G", qty=2, unitPrice=42, amount=84 ✅
+
+【ใบกำกับภาษี / Invoice ทั่วไป】
+- คัดลอกชื่อสินค้าจากบิลตรงๆ
+- อ่านทุกคอลัมน์ตามหัวตาราง: จำนวน × ราคา/หน่วย = จำนวนเงิน
+- VAT แยกบรรทัดท้ายตาราง
+- ยอดรวม = บรรทัด "รวมจำนวนเงินทั้งสิ้น"
+- นับบรรทัดสินค้าทั้งหมดใส่ใน "_itemCount"
+
+【บิลมือเขียน】
+- อ่านชื่อสินค้าตามที่เขียน แม้สะกดผิด ห้ามแก้ไข
+- ราคา = ตัวเลขด้านขวาของรายการ
+- ถ้าไม่มีหน่วย ให้ใส่ "รายการ"
+
+═══ กฎวันที่ ═══
+- ปี พ.ศ. → ค.ศ.: ลบ 543 (2568→2025, 68→2025)
+- format: YYYY-MM-DD เสมอ
+
+═══ กฎหมวดหมู่ (เลือกที่เหมาะสมที่สุดจากรายการสินค้าส่วนใหญ่) ═══
+01-อาหาร&เครื่องดื่ม: วัตถุดิบครัว ผัก เนื้อ ปลา เครื่องปรุง ขนม เครื่องดื่ม
+02-ห้องพัก: ผ้าเช็ดตัว ผ้าปูที่นอน สบู่ แชมพู อุปกรณ์ห้องน้ำ
+03-แม่บ้าน: น้ำยาทำความสะอาด ผงซักฟอก ถุงขยะ อุปกรณ์ทำความสะอาด
+04-ซ่อมบำรุง: อะไหล่ วัสดุก่อสร้าง สายไฟ อุปกรณ์ไฟฟ้า ค่าช่าง
+05-เชื้อเพลิง: น้ำมัน แก๊ส LPG
+06-สาธารณูปโภค: ค่าไฟ ค่าน้ำ อินเตอร์เน็ต โทรศัพท์
+07-สวน&สระ: ปุ๋ย ยาฆ่าแมลง คลอรีน อุปกรณ์สวน
+08-ขนส่ง: ค่าน้ำมันรถ ค่าขนส่ง
+09-การตลาด: ค่าโฆษณา OTA commission
+10-ทั่วไป&สำนักงาน: เครื่องเขียน ค่าประกัน ค่าธรรมเนียม
+11-พนักงาน: ชุดฟอร์ม อุปกรณ์พนักงาน
+12-อื่นๆ: ไม่อยู่ในหมวดข้างต้น
+
+═══ Output JSON เท่านั้น ห้ามมีข้อความอื่น ═══
+{
+  "date": "YYYY-MM-DD",
+  "docNo": "เลขที่ใบเสร็จ/Receipt No.",
+  "vendor": "ชื่อแบรนด์+สาขา เช่น Makro กบินทร์บุรี",
+  "taxId": "เลขภาษี 13 หลัก หรือ ''",
+  "category": "รหัส-ชื่อหมวด เช่น 01-อาหาร&เครื่องดื่ม",
+  "hasVat": true,
+  "items": [
+    { "rawName": "ชื่อตามบิลทุกตัวอักษร", "name": "ชื่อตามบิลทุกตัวอักษร", "qty": 1, "unit": "หน่วย", "unitPrice": 0, "amount": 0 }
+  ],
+  "subtotal": 0,
+  "vat": 0,
+  "total": 0,
+  "_itemCount": 0,
+  "note": ""
+}`;
 }
 
 async function runOCR() {
@@ -796,93 +951,22 @@ async function runOCR() {
   document.getElementById('batchQueue').style.display = 'none';
 
   const typeLabel = {expense:'รายจ่าย/บิลค่าใช้จ่าย', stock_in:'ใบรับสินค้า/ใบส่งของ', stock_out:'ใบเบิกสินค้า'}[docType];
-
-  const prompt = `คุณเป็น OCR Expert เชี่ยวชาญบิลและใบเสร็จไทย-อังกฤษ สำหรับโรงแรม/รีสอร์ท
-ประเภทเอกสาร: ${typeLabel}
-
-═══ กฎการอ่านตัวเลข (สำคัญมาก) ═══
-- amount ของแต่ละรายการ = qty × unitPrice เสมอ ตรวจสอบให้ถูกต้องก่อน output
-- total ต้องตรงกับยอดที่จ่ายจริงในบิล (บรรทัด "รวมเงิน" / "ยอดชำระ" / "TOTAL" ด้านล่างสุด)
-- ห้ามคำนวณ total เอง ให้อ่านจากบิลเท่านั้น
-- subtotal = ยอดก่อน VAT, vat = ภาษีมูลค่าเพิ่ม, total = subtotal + vat
-
-═══ กฎการอ่านตามประเภทบิล ═══
-
-【บิล MAKRO】
-- จำนวน: อ่านจากคอลัมน์ "QUANTITY OR WEIGHT" (ซ้ายสุด) ไม่ใช่ UNIT PACKS
-- ราคา/หน่วย: อ่านจากคอลัมน์ "PACK PRICE" หารด้วย UNIT PACKS
-- ยอดรายการ: อ่านจากคอลัมน์ "VALUE INCLUDED VAT" (ขวาสุด)
-- ยอดรวม: อ่านจาก "รวมเงิน" หรือ "815.00" บรรทัดล่างสุด ไม่ใช่ LEGAL AMOUNT
-- เลขที่: อ่านจาก "RECEIPT NO." ไม่ใช่ REF NO. หรือ TRACE
-
-ตัวอย่าง Makro:
-QUANTITY=2, ARTICLE=พาม่าเส้น, PACK PRICE=42.00, UNIT PACKS=1, VALUE INCLUDED VAT=84.00
-→ qty=2, name="พาม่าเส้นแห้ง", unitPrice=42, amount=84 ✅
-
-【ใบกำกับภาษี / Invoice ทั่วไป】
-- อ่านทุกคอลัมน์ตามหัวตาราง: จำนวน × ราคา/หน่วย = จำนวนเงิน
-- VAT แยกบรรทัดท้ายตาราง
-- ยอดรวม = บรรทัด "รวมจำนวนเงินทั้งสิ้น"
-
-【บิลมือเขียน】
-- อ่านชื่อสินค้าตามที่เขียน แม้สะกดผิด
-- ราคา = ตัวเลขด้านขวาของรายการ
-- ถ้าไม่มีหน่วย ให้ใส่ "รายการ"
-
-═══ กฎวันที่ ═══
-- ปี พ.ศ. → ค.ศ.: ลบ 543 (2568→2025, 68→2025)
-- format: YYYY-MM-DD เสมอ
-
-═══ กฎหมวดหมู่ (เลือกที่เหมาะสมที่สุด) ═══
-01-อาหาร&เครื่องดื่ม: วัตถุดิบครัว ผัก เนื้อ ปลา เครื่องปรุง ขนม เครื่องดื่ม
-02-ห้องพัก: ผ้าเช็ดตัว ผ้าปูที่นอน สบู่ แชมพู อุปกรณ์ห้องน้ำ
-03-แม่บ้าน: น้ำยาทำความสะอาด ผงซักฟอก ถุงขยะ อุปกรณ์ทำความสะอาด
-04-ซ่อมบำรุง: อะไหล่ วัสดุก่อสร้าง สายไฟ อุปกรณ์ไฟฟ้า ค่าช่าง
-05-เชื้อเพลิง: น้ำมัน แก๊ส LPG
-06-สาธารณูปโภค: ค่าไฟ ค่าน้ำ อินเตอร์เน็ต โทรศัพท์
-07-สวน&สระ: ปุ๋ย ยาฆ่าแมลง คลอรีน อุปกรณ์สวน
-08-ขนส่ง: ค่าน้ำมันรถ ค่าขนส่ง
-09-การตลาด: ค่าโฆษณา OTA commission
-10-ทั่วไป&สำนักงาน: เครื่องเขียน ค่าประกัน ค่าธรรมเนียม
-11-พนักงาน: ชุดฟอร์ม อุปกรณ์พนักงาน
-12-อื่นๆ: ไม่อยู่ในหมวดข้างต้น
-
-ตัวอย่างการจัดหมวด:
-- พาม่า, BKP ลา.แพงค์ไก่, SPC หมูบด → 01-อาหาร&เครื่องดื่ม
-- ผ้าเช็ดตัว, สบู่ → 02-ห้องพัก
-- สายไฟ, BCC cable → 04-ซ่อมบำรุง
-- แก๊สหุงต้ม → 05-เชื้อเพลิง
-
-═══ Output JSON เท่านั้น ห้ามมีข้อความอื่น ═══
-{
-  "date": "YYYY-MM-DD",
-  "docNo": "เลขที่ใบเสร็จ/Receipt No.",
-  "vendor": "ชื่อแบรนด์+สาขา เช่น Makro กบินทร์บุรี",
-  "taxId": "เลขภาษี 13 หลัก หรือ ''",
-  "category": "รหัส-ชื่อหมวด เช่น 01-อาหาร&เครื่องดื่ม",
-  "hasVat": true,
-  "items": [
-    { "name": "ชื่อสินค้าภาษาไทย", "qty": 1, "unit": "หน่วย", "unitPrice": 0, "amount": 0 }
-  ],
-  "subtotal": 0,
-  "vat": 0,
-  "total": 0,
-  "note": ""
-}`;
+  const prompt = buildPrompt(typeLabel);
 
   for (let i = 0; i < total; i++) {
     const file = fileQueue[i];
-    const pct = Math.round((i / total) * 100);
-    document.getElementById('batchBar').style.width = pct + '%';
+    document.getElementById('batchBar').style.width = Math.round((i / total) * 100) + '%';
     document.getElementById('batchLabel').textContent = `กำลังอ่าน ${i+1}/${total}: ${file.name}`;
 
-    // Update thumbnail status
     const statusEl = document.getElementById(`file-status-${i}`);
     if (statusEl) { statusEl.style.display = 'block'; statusEl.style.background = 'rgba(245,158,11,0.9)'; statusEl.style.color = '#fff'; statusEl.textContent = '⏳'; }
 
     try {
-      const b64 = await toB64(file);
-      const mime = file.type === 'application/pdf' ? 'application/pdf' : file.type;
+      // FIX: resize oversized flatbed scans before sending
+      const resized = await resizeForOCR(file);
+      const b64  = await toB64(resized);
+      const mime = resized.type === 'application/pdf' ? 'application/pdf' : resized.type;
+
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -892,23 +976,26 @@ QUANTITY=2, ARTICLE=พาม่าเส้น, PACK PRICE=42.00, UNIT PACKS=1,
           'anthropic-dangerous-direct-browser-access': 'true'
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514', max_tokens: 2000,
+          // FIX: increased to 4000 for long Makro receipts
+          model: 'claude-sonnet-4-20250514', max_tokens: 4000,
           messages: [{ role: 'user', content: [
             { type: 'image', source: { type: 'base64', media_type: mime, data: b64 } },
             { type: 'text', text: prompt }
           ]}]
         })
       });
+
       if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'HTTP ' + res.status); }
       const data = await res.json();
       const txt = data.content.map(c => c.text || '').join('');
-      const m = txt.match(/\{[\s\S]*\}/);
-      if (!m) throw new Error('ไม่พบ JSON');
-      const parsed = JSON.parse(m[0]);
+
+      // FIX: use safe parser with validation
+      const parsed = parseOCRResponse(txt);
       parsed._fileName = file.name;
       parsed._idx = i;
       ocrResultQueue.push({ file, data: parsed, status: 'ok' });
       if (statusEl) { statusEl.style.background = 'rgba(45,158,107,0.9)'; statusEl.textContent = '✅'; }
+
     } catch(err) {
       ocrResultQueue.push({ file, data: null, status: 'error', error: err.message });
       if (statusEl) { statusEl.style.background = 'rgba(232,69,69,0.9)'; statusEl.textContent = '❌'; }
@@ -920,14 +1007,12 @@ QUANTITY=2, ARTICLE=พาม่าเส้น, PACK PRICE=42.00, UNIT PACKS=1,
   document.getElementById('ocrBtn').disabled = false;
 
   if (total === 1 && ocrResultQueue[0].status === 'ok') {
-    // Single file — show form as before
     const parsed = ocrResultQueue[0].data;
     fillForm(parsed);
     document.getElementById('rawJson').textContent = JSON.stringify(parsed, null, 2);
     document.getElementById('resultCard').style.display = 'block';
     toast('✅ OCR สำเร็จ!', 's');
   } else {
-    // Multiple files — show queue
     renderBatchQueue();
     document.getElementById('batchQueue').style.display = 'block';
     const ok = ocrResultQueue.filter(r => r.status === 'ok').length;
@@ -935,19 +1020,79 @@ QUANTITY=2, ARTICLE=พาม่าเส้น, PACK PRICE=42.00, UNIT PACKS=1,
   }
 }
 
+// ─── Retry single failed file ─────────────────────────────────────────────
+async function retrySingle(qi) {
+  const r = ocrResultQueue[qi];
+  if (!r) return;
+  const key = CFG.ant;
+  if (!key) { toast('ยังไม่มี API Key', 'e'); return; }
+
+  const typeLabel = {expense:'รายจ่าย/บิลค่าใช้จ่าย', stock_in:'ใบรับสินค้า/ใบส่งของ', stock_out:'ใบเบิกสินค้า'}[docType];
+  const prompt = buildPrompt(typeLabel);
+
+  // Update UI to loading
+  const el = document.getElementById(`qitem-${qi}`);
+  if (el) el.style.opacity = '0.5';
+
+  try {
+    const resized = await resizeForOCR(r.file);
+    const b64  = await toB64(resized);
+    const mime = resized.type === 'application/pdf' ? 'application/pdf' : resized.type;
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 4000,
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: mime, data: b64 } },
+          { type: 'text', text: prompt }
+        ]}]
+      })
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'HTTP ' + res.status); }
+    const data = await res.json();
+    const txt = data.content.map(c => c.text || '').join('');
+    const parsed = parseOCRResponse(txt);
+    parsed._fileName = r.file.name;
+    ocrResultQueue[qi] = { file: r.file, data: parsed, status: 'ok' };
+    toast(`✅ ลองใหม่สำเร็จ: ${r.file.name}`, 's');
+  } catch(err) {
+    ocrResultQueue[qi].error = err.message;
+    toast(`❌ ลองใหม่ล้มเหลว: ${err.message}`, 'e');
+  }
+  renderBatchQueue();
+}
+
 function renderBatchQueue() {
-  const list = document.getElementById('queueList');
+  const list  = document.getElementById('queueList');
   const count = document.getElementById('queueCount');
+  const totalEl = document.getElementById('queueTotal');
   const ok = ocrResultQueue.filter(r => r.status === 'ok');
+
   count.textContent = `${ok.length} รายการพร้อมบันทึก`;
+  // FIX: show batch total amount
+  const batchSum = ok.reduce((s, r) => s + (r.data?.total || 0), 0);
+  totalEl.textContent = ok.length ? `รวม ฿${fmt(batchSum)}` : '';
+
   list.innerHTML = ocrResultQueue.map((r, qi) => {
     if (r.status === 'error') return `
-      <div style="background:rgba(232,69,69,0.08);border:1px solid rgba(232,69,69,0.2);border-radius:8px;padding:12px">
-        <div style="font-size:12px;font-weight:600;color:var(--red)">❌ ${r.file.name}</div>
-        <div style="font-size:11px;color:var(--ink2)">${r.error}</div>
+      <div style="background:rgba(232,69,69,0.08);border:1px solid rgba(232,69,69,0.2);border-radius:8px;padding:12px" id="qitem-${qi}">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:12px;font-weight:600;color:var(--red)">❌ ${r.file.name}</span>
+          <button class="btn btn-xs btn-orange" onclick="retrySingle(${qi})">🔄 ลองใหม่</button>
+        </div>
+        <div style="font-size:11px;color:var(--ink2);margin-top:4px">${r.error}</div>
       </div>`;
+
     const d = r.data;
-    const vatLabel = d.hasVat ? `<span style="background:rgba(59,111,232,0.1);color:var(--blue);padding:1px 7px;border-radius:4px;font-size:10px;font-weight:700">VAT</span>` : `<span style="background:rgba(176,168,158,0.2);color:var(--ink2);padding:1px 7px;border-radius:4px;font-size:10px;font-weight:700">No VAT</span>`;
+    const vatLabel = d.hasVat
+      ? `<span style="background:rgba(59,111,232,0.1);color:var(--blue);padding:1px 7px;border-radius:4px;font-size:10px;font-weight:700">VAT</span>`
+      : `<span style="background:rgba(176,168,158,0.2);color:var(--ink2);padding:1px 7px;border-radius:4px;font-size:10px;font-weight:700">No VAT</span>`;
+    const warnHtml = d._warnings?.length
+      ? `<div style="font-size:11px;color:var(--red);margin-top:6px">${d._warnings.join('<br>')}</div>` : '';
+    const truncHtml = (d._itemCount && d.items.length < d._itemCount * 0.85)
+      ? `<div style="font-size:11px;color:var(--orange);margin-top:4px">⚠️ อ่านได้ ${d.items.length}/${d._itemCount} รายการ</div>` : '';
+
     return `
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px" id="qitem-${qi}">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
@@ -962,8 +1107,10 @@ function renderBatchQueue() {
           <div>🏷️ ${d.category||'—'}</div>
         </div>
         <div style="margin-top:8px;font-size:11px;color:var(--ink2)">
-          ${(d.items||[]).map(it => `${it.name} × ${it.qty} ${it.unit} = ฿${fmt(it.amount)}`).join(' &nbsp;|&nbsp; ')}
+          ${(d.items||[]).slice(0,5).map(it => `${it.name} × ${it.qty} ${it.unit} = ฿${fmt(it.amount)}`).join(' &nbsp;|&nbsp; ')}
+          ${d.items?.length > 5 ? ` <span style="color:var(--ink3)">...+${d.items.length-5} รายการ</span>` : ''}
         </div>
+        ${warnHtml}${truncHtml}
       </div>`;
   }).join('');
 }
@@ -989,9 +1136,7 @@ async function saveAllQueue() {
       vat: d.vat, total: d.total, note: d.note || '',
       hasVat: d.hasVat,
     };
-    if (docType === 'expense') {
-      DB.expenses.unshift(rec);
-    }
+    if (docType === 'expense') DB.expenses.unshift(rec);
     if (docType === 'stock_in' || docType === 'stock_out') {
       (d.items || []).forEach(item => {
         let s = DB.stock.find(x => x.name.toLowerCase() === item.name.toLowerCase());
@@ -1008,14 +1153,14 @@ async function saveAllQueue() {
   localStorage.setItem('st_exp', JSON.stringify(DB.expenses));
   toast(`💾 บันทึก ${saved} รายการเรียบร้อย!`, 's');
   updateBadges();
-  ocrResultQueue = [];
-  fileQueue = [];
+  ocrResultQueue = []; fileQueue = [];
   renderFileQueue();
   document.getElementById('batchQueue').style.display = 'none';
   document.getElementById('batchProgress').style.display = 'none';
   fileInput.value = '';
+  // FIX: navigate to expenses after bulk save
+  setTimeout(() => goto('expenses'), 600);
 }
-
 
 function setOcrLoading(on) {
   document.getElementById('ocrBtn').disabled = on;
@@ -1024,30 +1169,70 @@ function setOcrLoading(on) {
 }
 
 function fillForm(d) {
-  document.getElementById('r_date').value = d.date || new Date().toISOString().split('T')[0];
-  document.getElementById('r_docno').value = d.docNo || '';
+  document.getElementById('r_date').value   = d.date || new Date().toISOString().split('T')[0];
+  document.getElementById('r_docno').value  = d.docNo || '';
   document.getElementById('r_vendor').value = d.vendor || '';
-  document.getElementById('r_taxid').value = d.taxId || '';
-  document.getElementById('r_cat').value = d.category || selCat;
-  document.getElementById('r_note').value = d.note || '';
+  document.getElementById('r_taxid').value  = d.taxId || '';
+  document.getElementById('r_cat').value    = d.category || selCat;
+  document.getElementById('r_note').value   = d.note || '';
+
+  // Show OCR warnings
+  const warnEl = document.getElementById('ocrWarning');
+  if (d._warnings?.length) {
+    warnEl.innerHTML = d._warnings.join('<br>');
+    warnEl.classList.add('show');
+  } else {
+    warnEl.classList.remove('show');
+  }
+
+  // FIX: duplicate detection
+  const dupEl = document.getElementById('dupWarning');
+  const dup = checkDuplicate(d.docNo, d.vendor);
+  if (dup) {
+    dupEl.innerHTML = `⚠️ พบบิลซ้ำ! เลขที่ <strong>${d.docNo}</strong> จาก <strong>${d.vendor}</strong> บันทึกไปแล้วเมื่อ ${dup.date} — กรุณาตรวจสอบก่อนบันทึก`;
+    dupEl.classList.add('show');
+  } else {
+    dupEl.classList.remove('show');
+  }
+
+  // FIX: item count info
+  const countInfo = document.getElementById('itemCountInfo');
+  if (d._itemCount && d._itemCount > 0) {
+    const extracted = (d.items || []).length;
+    countInfo.textContent = extracted < d._itemCount
+      ? `⚠️ อ่านได้ ${extracted} จาก ${d._itemCount} รายการ`
+      : `${extracted} รายการ`;
+    countInfo.style.color = extracted < d._itemCount ? 'var(--red)' : 'var(--ink3)';
+  } else {
+    countInfo.textContent = '';
+  }
+
   const tbody = document.getElementById('itemsBody');
   tbody.innerHTML = '';
-  const items = d.items?.length ? d.items : [{ name: '', qty: 1, unit: 'ชิ้น', unitPrice: 0, amount: 0 }];
+  const items = d.items?.length ? d.items : [{ name: '', rawName: '', qty: 1, unit: 'ชิ้น', unitPrice: 0, amount: 0 }];
   items.forEach(i => addRow(i));
   recalc();
-  // highlight matching category tag
+
   document.querySelectorAll('.tag-cat').forEach(t => {
     if (t.dataset.cat === d.category) { t.classList.add('active'); selCat = d.category; }
     else t.classList.remove('active');
   });
 }
 
+// FIX: addRow now shows rawName as subtitle for verification
 function addRow(item = null) {
   const tr = document.createElement('tr');
+  const rawName = item?.rawName || item?.name || '';
+  const displayName = item?.name || '';
+  // Show rawName tag only if it differs from name or looks like an abbreviated code
+  const showRaw = rawName && rawName !== displayName;
   tr.innerHTML = `
-    <td><input type="text" placeholder="รายการ..." value="${item?.name || ''}" oninput="recalc()" /></td>
+    <td>
+      <input type="text" placeholder="รายการ..." value="${escHtml(displayName)}" oninput="recalc()" />
+      ${showRaw ? `<span class="raw-name-tag" title="ชื่อบนบิล: ${escHtml(rawName)}">📄 ${escHtml(rawName)}</span>` : ''}
+    </td>
     <td><input type="number" value="${item?.qty ?? 1}" min="0" step="0.01" oninput="recalc()" /></td>
-    <td><input type="text" value="${item?.unit || 'ชิ้น'}" placeholder="หน่วย" /></td>
+    <td><input type="text" value="${escHtml(item?.unit || 'ชิ้น')}" placeholder="หน่วย" /></td>
     <td><input type="number" value="${item?.unitPrice ?? 0}" min="0" step="0.01" oninput="recalc()" /></td>
     <td><input type="number" value="${item?.amount ?? 0}" readonly style="color:var(--ink2)" /></td>
     <td><button class="btn-row-del" onclick="this.closest('tr').remove();recalc()">×</button></td>`;
@@ -1055,19 +1240,23 @@ function addRow(item = null) {
   recalc();
 }
 
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 function recalc() {
   let sub = 0;
   document.querySelectorAll('#itemsBody tr').forEach(tr => {
     const inp = tr.querySelectorAll('input');
     const qty = parseFloat(inp[1].value) || 0;
-    const up = parseFloat(inp[3].value) || 0;
+    const up  = parseFloat(inp[3].value) || 0;
     const amt = qty * up;
     inp[4].value = amt.toFixed(2);
     sub += amt;
   });
   const vat = sub * 0.07;
-  document.getElementById('s_sub').textContent = fmt(sub);
-  document.getElementById('s_vat').textContent = fmt(vat);
+  document.getElementById('s_sub').textContent   = fmt(sub);
+  document.getElementById('s_vat').textContent   = fmt(vat);
   document.getElementById('s_total').textContent = fmt(sub + vat);
 }
 
@@ -1090,60 +1279,54 @@ async function saveRecord() {
   const rec = {
     id: Date.now(),
     type: docType,
-    date: document.getElementById('r_date').value,
-    docNo: document.getElementById('r_docno').value,
-    vendor: document.getElementById('r_vendor').value,
-    taxId: document.getElementById('r_taxid').value,
+    date:     document.getElementById('r_date').value,
+    docNo:    document.getElementById('r_docno').value,
+    vendor:   document.getElementById('r_vendor').value,
+    taxId:    document.getElementById('r_taxid').value,
     category: document.getElementById('r_cat').value || selCat,
-    items,
-    subtotal: sub,
-    vat,
-    total: sub + vat,
+    items, subtotal: sub, vat, total: sub + vat,
     note: document.getElementById('r_note').value,
   };
 
-  // Save expenses
   if (docType === 'expense') {
     DB.expenses.unshift(rec);
     localStorage.setItem('st_exp', JSON.stringify(DB.expenses));
   }
 
-  // Update stock
   if (docType === 'stock_in' || docType === 'stock_out') {
     items.forEach(item => {
       let s = DB.stock.find(x => x.name.toLowerCase() === item.name.toLowerCase());
       if (!s) {
-        s = { id: Date.now() + Math.random(), name: item.name, sku: 'SKU-' + String(DB.stock.length + 1).padStart(3,'0'), qty: 0, unit: item.unit || 'ชิ้น', min: 5, cost: item.unitPrice };
+        s = { id: Date.now()+Math.random(), name: item.name, sku: 'SKU-'+String(DB.stock.length+1).padStart(3,'0'), qty: 0, unit: item.unit||'ชิ้น', min: 5, cost: item.unitPrice };
         DB.stock.push(s);
       }
-      const before = s.qty;
       if (docType === 'stock_in') s.qty += item.qty;
       else s.qty = Math.max(0, s.qty - item.qty);
-      // Write log
-      addStockLog({ itemName: item.name, type: docType === 'stock_in' ? 'ocr_in' : 'ocr_out', qty: item.qty, after: s.qty, note: rec.note || '', ref: rec.docNo || 'OCR' });
+      addStockLog({ itemName: item.name, type: docType==='stock_in'?'ocr_in':'ocr_out', qty: item.qty, after: s.qty, note: rec.note||'', ref: rec.docNo||'OCR' });
     });
     localStorage.setItem('st_stock', JSON.stringify(DB.stock));
   }
 
-  // Push to Google Sheet
   await pushToSheet(rec);
   toast('💾 บันทึกเรียบร้อยแล้ว!', 's');
   updateBadges();
   resetOCR();
   fileQueue = [];
   renderFileQueue();
+  // FIX: navigate to expenses after save
+  setTimeout(() => goto('expenses'), 600);
 }
 
 function resetOCR() {
-  currentFile = null;
-  fileQueue = [];
-  ocrResultQueue = [];
+  currentFile = null; fileQueue = []; ocrResultQueue = [];
   renderFileQueue();
-  document.getElementById('resultCard').style.display = 'none';
-  document.getElementById('batchQueue').style.display = 'none';
+  document.getElementById('resultCard').style.display    = 'none';
+  document.getElementById('batchQueue').style.display    = 'none';
   document.getElementById('batchProgress').style.display = 'none';
   document.getElementById('itemsBody').innerHTML = '';
   document.getElementById('ocrBtn').disabled = true;
+  document.getElementById('ocrWarning').classList.remove('show');
+  document.getElementById('dupWarning').classList.remove('show');
   fileInput.value = '';
 }
 
@@ -1151,7 +1334,6 @@ function resetOCR() {
 async function pushToSheet(rec) {
   const { sheetId, sheetKey } = CFG;
   if (!sheetId || !sheetKey) { toast('⚠️ ยังไม่ตั้งค่า Google Sheet — บันทึกในเครื่องเท่านั้น', 'i'); return; }
-
   const sheetName = rec.type === 'expense' ? 'รายจ่าย' : 'สต๊อก';
   const values = [[
     rec.date, rec.docNo, rec.vendor, rec.category,
@@ -1160,14 +1342,9 @@ async function pushToSheet(rec) {
     rec.subtotal.toFixed(2), rec.vat.toFixed(2), rec.total.toFixed(2),
     rec.type, rec.hasVat ? 'มี VAT' : 'No VAT', rec.note, new Date().toLocaleString('th-TH')
   ]];
-
   try {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}:append?valueInputOption=RAW&key=${sheetKey}`;
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ values })
-    });
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ values }) });
     if (!res.ok) throw new Error('Sheet API error ' + res.status);
     toast('✅ บันทึกลง Google Sheet แล้ว!', 's');
   } catch(e) {
@@ -1179,8 +1356,7 @@ async function testConnection() {
   const { sheetId, sheetKey } = CFG;
   if (!sheetId || !sheetKey) { toast('กรุณาใส่ Sheet ID และ API Key ก่อน', 'e'); return; }
   try {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?key=${sheetKey}`;
-    const res = await fetch(url);
+    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?key=${sheetKey}`);
     if (!res.ok) throw new Error('ตรวจสอบ Sheet ID และ API Key');
     const d = await res.json();
     toast('✅ เชื่อมต่อสำเร็จ: ' + d.properties?.title, 's');
@@ -1193,12 +1369,10 @@ async function testConnection() {
 function exportSheet() {
   const rows = [['วันที่','เลขที่','ร้านค้า','หมวด','รายการ','ยอดก่อนVAT','VAT','ยอดรวม','ประเภท','หมายเหตุ']];
   DB.expenses.forEach(r => rows.push([r.date,r.docNo,r.vendor,r.category,r.items?.map(i=>i.name).join('; ')||'',r.subtotal?.toFixed(2),r.vat?.toFixed(2),r.total?.toFixed(2),r.type,r.note]));
-  const csv = rows.map(r => r.map(c => `"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const csv  = rows.map(r => r.map(c => `"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `stocktrack_${new Date().toISOString().split('T')[0]}.csv`;
-  a.click();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `stocktrack_${new Date().toISOString().split('T')[0]}.csv`; a.click();
   toast('📥 Export CSV สำเร็จ!', 's');
 }
 
@@ -1206,45 +1380,40 @@ function exportSheet() {
 function renderDash() {
   const now = new Date(); const m = now.getMonth(); const y = now.getFullYear();
   const monthly = DB.expenses.filter(e => { const d = new Date(e.date); return d.getMonth()===m && d.getFullYear()===y; });
-  const mTotal = monthly.reduce((s,e) => s + (e.total||0), 0);
+  const mTotal   = monthly.reduce((s,e) => s + (e.total||0), 0);
   const allTotal = DB.expenses.reduce((s,e) => s + (e.total||0), 0);
   const lowItems = DB.stock.filter(s => s.qty <= s.min);
 
-  document.getElementById('st-month').textContent = '฿' + fmt(mTotal);
+  document.getElementById('st-month').textContent    = '฿' + fmt(mTotal);
   document.getElementById('st-month-ct').textContent = monthly.length + ' รายการเดือนนี้';
-  document.getElementById('st-total').textContent = '฿' + fmt(allTotal);
+  document.getElementById('st-total').textContent    = '฿' + fmt(allTotal);
   document.getElementById('st-total-ct').textContent = DB.expenses.length + ' รายการทั้งหมด';
-  document.getElementById('st-items').textContent = DB.stock.length;
-  document.getElementById('st-low').textContent = lowItems.length;
+  document.getElementById('st-items').textContent    = DB.stock.length;
+  document.getElementById('st-low').textContent      = lowItems.length;
 
-  // Recent expenses
   const tbody = document.getElementById('dash-exp-body');
-  if (!DB.expenses.length) { tbody.innerHTML = '<tr><td colspan="4"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">ยังไม่มีรายการ</div></div></td></tr>'; }
-  else {
-    tbody.innerHTML = DB.expenses.slice(0,5).map(e => `
-      <tr><td class="text-sm text-mono">${e.date}</td>
-      <td>${e.vendor||'—'}</td>
-      <td><span class="chip chip-orange">${e.category||'—'}</span></td>
-      <td style="text-align:right;font-family:var(--mono);color:var(--red)">฿${fmt(e.total)}</td></tr>`).join('');
-  }
+  tbody.innerHTML = !DB.expenses.length
+    ? '<tr><td colspan="4"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">ยังไม่มีรายการ</div></div></td></tr>'
+    : DB.expenses.slice(0,5).map(e => `
+        <tr><td class="text-sm text-mono">${e.date}</td>
+        <td>${e.vendor||'—'}</td>
+        <td><span class="chip chip-orange">${e.category||'—'}</span></td>
+        <td style="text-align:right;font-family:var(--mono);color:var(--red)">฿${fmt(e.total)}</td></tr>`).join('');
 
-  // Low stock
   const lowBody = document.getElementById('dash-low-body');
-  if (!lowItems.length) { lowBody.innerHTML = '<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">สต๊อกปกติทุกรายการ</div></div>'; }
-  else {
-    lowBody.innerHTML = lowItems.map(s => `
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--surface2)">
-        <div><div style="font-size:13px;font-weight:600">${s.name}</div><div class="text-sm">${s.sku}</div></div>
-        <div style="text-align:right"><div style="font-size:18px;font-weight:700;color:var(--red)">${s.qty}</div><div class="text-sm">${s.unit}</div></div>
-      </div>`).join('');
-  }
+  lowBody.innerHTML = !lowItems.length
+    ? '<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">สต๊อกปกติทุกรายการ</div></div>'
+    : lowItems.map(s => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--surface2)">
+          <div><div style="font-size:13px;font-weight:600">${s.name}</div><div class="text-sm">${s.sku}</div></div>
+          <div style="text-align:right"><div style="font-size:18px;font-weight:700;color:var(--red)">${s.qty}</div><div class="text-sm">${s.unit}</div></div>
+        </div>`).join('');
 }
 
 function renderExpenses() {
   const tbody = document.getElementById('expBody');
   document.getElementById('exp-sub').textContent = DB.expenses.length + ' รายการ';
   if (!DB.expenses.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">💸</div><div class="empty-text">ยังไม่มีรายจ่าย</div></div></td></tr>'; return; }
-  const cats = { expense: 'chip-orange', stock_in: 'chip-green', stock_out: 'chip-blue' };
   tbody.innerHTML = DB.expenses.map((e, i) => `
     <tr>
       <td class="text-mono" style="font-size:12px">${e.date}</td>
@@ -1291,8 +1460,8 @@ function renderStock() {
 // ─── Stock CRUD ───────────────────────────────────────────────────────────
 function openAddStock() {
   ['ms_name','ms_sku','ms_unit'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('ms_qty').value = 0;
-  document.getElementById('ms_min').value = 5;
+  document.getElementById('ms_qty').value  = 0;
+  document.getElementById('ms_min').value  = 5;
   document.getElementById('ms_cost').value = 0;
   document.getElementById('addStockModal').dataset.edit = '';
   openModal('addStockModal');
@@ -1300,10 +1469,10 @@ function openAddStock() {
 function openEditStock(i) {
   const s = DB.stock[i];
   document.getElementById('ms_name').value = s.name;
-  document.getElementById('ms_sku').value = s.sku;
-  document.getElementById('ms_qty').value = s.qty;
+  document.getElementById('ms_sku').value  = s.sku;
+  document.getElementById('ms_qty').value  = s.qty;
   document.getElementById('ms_unit').value = s.unit;
-  document.getElementById('ms_min').value = s.min;
+  document.getElementById('ms_min').value  = s.min;
   document.getElementById('ms_cost').value = s.cost || 0;
   document.getElementById('addStockModal').dataset.edit = i;
   openModal('addStockModal');
@@ -1312,10 +1481,10 @@ function saveStock() {
   const idx = document.getElementById('addStockModal').dataset.edit;
   const obj = {
     name: document.getElementById('ms_name').value,
-    sku: document.getElementById('ms_sku').value || 'SKU-' + String(DB.stock.length+1).padStart(3,'0'),
-    qty: parseFloat(document.getElementById('ms_qty').value)||0,
+    sku:  document.getElementById('ms_sku').value || 'SKU-'+String(DB.stock.length+1).padStart(3,'0'),
+    qty:  parseFloat(document.getElementById('ms_qty').value)||0,
     unit: document.getElementById('ms_unit').value || 'ชิ้น',
-    min: parseFloat(document.getElementById('ms_min').value)||5,
+    min:  parseFloat(document.getElementById('ms_min').value)||5,
     cost: parseFloat(document.getElementById('ms_cost').value)||0,
   };
   if (!obj.name) { toast('กรุณาใส่ชื่อสินค้า', 'e'); return; }
@@ -1334,16 +1503,16 @@ function delStock(i) {
 function openAdj(i) {
   adjTarget = i;
   document.getElementById('adj_name').value = DB.stock[i].name;
-  document.getElementById('adj_qty').value = 1;
+  document.getElementById('adj_qty').value  = 1;
   document.getElementById('adj_note').value = '';
   openModal('adjModal');
 }
 function confirmAdj() {
-  const s = DB.stock[adjTarget];
-  const t = document.getElementById('adj_type').value;
-  const q = parseFloat(document.getElementById('adj_qty').value)||0;
+  const s    = DB.stock[adjTarget];
+  const t    = document.getElementById('adj_type').value;
+  const q    = parseFloat(document.getElementById('adj_qty').value)||0;
   const note = document.getElementById('adj_note').value;
-  if (t === 'in') s.qty += q;
+  if (t === 'in')  s.qty += q;
   else if (t === 'out') s.qty = Math.max(0, s.qty - q);
   else s.qty = q;
   addStockLog({ itemName: s.name, type: t, qty: q, after: s.qty, note, ref: 'ปรับมือ' });
@@ -1354,17 +1523,7 @@ function confirmAdj() {
 
 // ─── Stock Log ────────────────────────────────────────────────────────────
 function addStockLog({ itemName, type, qty, after, note, ref }) {
-  const entry = {
-    id: Date.now(),
-    ts: new Date().toLocaleString('th-TH'),
-    itemName,
-    type,   // in / out / set / ocr_in / ocr_out
-    qty,
-    after,
-    note: note || '',
-    ref: ref || '',
-  };
-  DB.stocklog.unshift(entry);
+  DB.stocklog.unshift({ id: Date.now(), ts: new Date().toLocaleString('th-TH'), itemName, type, qty, after, note: note||'', ref: ref||'' });
   localStorage.setItem('st_stocklog', JSON.stringify(DB.stocklog));
 }
 
@@ -1372,8 +1531,9 @@ function populateLogFilter() {
   const sel = document.getElementById('log-filter-item');
   const cur = sel.value;
   sel.innerHTML = '<option value="">ทุกสินค้า</option>';
-  const names = [...new Set(DB.stocklog.map(l => l.itemName))];
-  names.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n; if (n === cur) o.selected = true; sel.appendChild(o); });
+  [...new Set(DB.stocklog.map(l => l.itemName))].forEach(n => {
+    const o = document.createElement('option'); o.value = n; o.textContent = n; if (n === cur) o.selected = true; sel.appendChild(o);
+  });
 }
 
 function renderStockLog() {
@@ -1385,14 +1545,11 @@ function renderStockLog() {
   document.getElementById('log-sub').textContent = logs.length + ' รายการ';
 
   const typeLabel = { in:'📥 รับเข้า', out:'📤 เบิกออก', set:'📌 ตั้งค่าใหม่', ocr_in:'📸 รับ(OCR)', ocr_out:'📸 เบิก(OCR)' };
-  const typeChip = { in:'chip-green', out:'chip-red', set:'chip-blue', ocr_in:'chip-green', ocr_out:'chip-red' };
+  const typeChip  = { in:'chip-green', out:'chip-red', set:'chip-blue', ocr_in:'chip-green', ocr_out:'chip-red' };
 
   const tbody = document.getElementById('logBody');
-  if (!logs.length) {
-    tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">ยังไม่มี log</div></div></td></tr>';
-    return;
-  }
-  tbody.innerHTML = logs.map((l, i) => `
+  if (!logs.length) { tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">ยังไม่มี log</div></div></td></tr>'; return; }
+  tbody.innerHTML = logs.map(l => `
     <tr>
       <td class="text-mono" style="font-size:11px;white-space:nowrap">${l.ts}</td>
       <td style="font-weight:600">${l.itemName}</td>
@@ -1409,29 +1566,28 @@ function renderStockLog() {
 function exportStockLog() {
   const rows = [['วันที่/เวลา','สินค้า','ประเภท','จำนวน','คงเหลือ','หมายเหตุ','อ้างอิง']];
   DB.stocklog.forEach(l => rows.push([l.ts, l.itemName, l.type, l.qty, l.after, l.note, l.ref]));
-  const csv = rows.map(r => r.map(c => `"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const csv  = rows.map(r => r.map(c => `"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `stocklog_${new Date().toISOString().split('T')[0]}.csv`;
-  a.click();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `stocklog_${new Date().toISOString().split('T')[0]}.csv`; a.click();
   toast('📥 Export Log สำเร็จ!', 's');
 }
 
-
 function updateBadges() {
   const low = DB.stock.filter(s => s.qty <= s.min).length;
-  const bl = document.getElementById('badge-low');
+  const bl  = document.getElementById('badge-low');
   bl.style.display = low ? 'inline' : 'none';
-  bl.textContent = low;
+  bl.textContent   = low;
 }
+
 function clearAll() {
   if (!confirm('ล้างข้อมูลทั้งหมดในเครื่อง?')) return;
   DB.expenses.length = 0; DB.stock.length = 0; DB.stocklog.length = 0;
   localStorage.removeItem('st_exp'); localStorage.removeItem('st_stock'); localStorage.removeItem('st_stocklog');
   updateBadges(); toast('🗑️ ล้างข้อมูลแล้ว', 'i');
 }
-function openModal(id) { document.getElementById(id).classList.add('open'); }
+
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
 let toastT;
@@ -1444,8 +1600,13 @@ function toast(msg, t='i') {
   toastT = setTimeout(() => el.classList.remove('show'), 3200);
 }
 
-const fmt = n => Number(n).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const toB64 = f => new Promise((res,rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = () => rej(new Error('อ่านไฟล์ล้มเหลว')); r.readAsDataURL(f); });
+const fmt  = n => Number(n).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const toB64 = f => new Promise((res, rej) => {
+  const r = new FileReader();
+  r.onload  = () => res(r.result.split(',')[1]);
+  r.onerror = () => rej(new Error('อ่านไฟล์ล้มเหลว'));
+  r.readAsDataURL(f);
+});
 
 // Init
 document.getElementById('r_date').value = new Date().toISOString().split('T')[0];
