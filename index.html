@@ -1168,6 +1168,11 @@ ${catList}
 
 กฎวันที่และเลขที่:
 - เลขที่บิล: อ่านจาก "RECEIPT NO." เท่านั้น — ไม่ใช่ REF NO., TRACE NO., BATCH NO., หรือ TID
+- RECEIPT NO. อาจมี % หรือ $ นำหน้า (logo Makro) — ให้ตัดออก เก็บแค่ตัวเลข
+  เช่น "%154021433814" → docNo = "154021433814"
+- Receipt No ของ Makro มี 12 หลัก — ถ้าได้น้อยกว่าแสดงว่าอ่านตก
+- แผ่นที่ / PAGE NO. ที่อยู่ใกล้ RECEIPT NO. ไม่ใช่ส่วนหนึ่งของเลขที่บิล
+- ตราประทับ "STORE XXX" หรือ "ตรวจแล้ว" อาจทับเลขที่บิล — อ่านเลขที่อยู่ใต้ตราประทับด้วย
 - วันที่ Makro: รูปแบบในบิลคือ DD-MM-YYYY (วัน-เดือน-ปี)
   เช่น 04-08-2025 = วันที่ 4 สิงหาคม 2025 → output "2025-08-04"
   เช่น 15-01-2025 = วันที่ 15 มกราคม 2025 → output "2025-01-15"
@@ -1176,26 +1181,31 @@ ${catList}
 - ชื่อร้าน: อ่านจาก "สาขาที่ XXXXX สาขา[ชื่อ]" ในหัวบิล ไม่ใช่เลขสาขาท้ายบิล
   เช่น "สาขาที่ 00149 สาขาปราจีนบุรี" → vendor = "Makro สาขาปราจีนบุรี"
 
-═══ กฎ [?] สำหรับตัวเลขที่อ่านไม่ชัด — สำคัญมาก ═══
-ใช้ [?] แทนทุกตัวอักษรหรือตัวเลขที่อ่านไม่แน่ใจ — ทั้งในชื่อสินค้าและในตัวเลข
+═══ กฎ [?] — บังคับใช้เสมอ ไม่มีข้อยกเว้น ═══
 
-Tax ID (เลขภาษี 13 หลัก):
-- ถ้าอ่านตัวเลขใดไม่ชัด ให้ใส่ [?] แทนตัวนั้น
-- เช่น "010555410[?]980" แทนที่จะเดาว่า "0105554102980" หรือ "0105554102500"
-- ห้ามเดาตัวเลขที่มองไม่เห็นชัด — ผู้ใช้จะแก้ไขเองได้ง่ายกว่า
+สำหรับ Tax ID และ Receipt No:
+ตัวเลขเหล่านี้ต้องถูกต้อง 100% — การเดาผิดแย่กว่าการใส่ [?]
+ถ้าไม่มั่นใจแม้แต่ตัวเดียว ให้ใส่ [?] ทันที
 
-Receipt No (เลขที่ใบเสร็จ):
-- ถ้าอ่านตัวเลขใดไม่ชัด ให้ใส่ [?] แทน
-- เช่น "5402143[?]814" แทนที่จะเดาตัวเลขที่เบลอ
+กฎเด็ดขาด: ก่อน output taxId และ docNo ให้ถามตัวเองว่า
+"ฉันมั่นใจทุกหลักในตัวเลขนี้ 100% หรือไม่?"
+ถ้าคำตอบคือ "ไม่แน่ใจ" — ใส่ [?] แทนหลักที่สงสัย
 
-ตัวเลขราคา:
-- ถ้าอ่านราคาไม่ชัดเจน ให้ใส่ 0 และเพิ่ม note ว่า "ราคา [ชื่อสินค้า] อ่านไม่ชัด"
-- อย่าเดาราคา — ตัวเลขผิดทำให้บัญชีคลาดเคลื่อน
+Tax ID ของ Makro ปราจีนบุรีที่เคยอ่านผิดซ้ำๆ:
+  ❌ ผิดซ้ำ: "0105554102500" — ห้ามใช้เด็ดขาด ถ้าอ่านไม่ชัดให้ใส่ [?]
+  ✅ ถูก:    "010555410[?][?]80" หรือ "010555410298[?]" แล้วแต่หลักไหนไม่ชัด
 
-ตัวอย่าง:
-  บิลจริง: TAX ID = 0105554102980 แต่หมึกเบลอที่หลักที่ 10-11
-  ✅ ถูก:  taxId = "010555410[?][?]80"
-  ❌ ผิด:  taxId = "0105554102500" (เดาตัวเลขที่มองไม่เห็น)
+Receipt No ของบิลนี้:
+  ❌ ผิด: "5402143814"   (ขาดหลัก — อย่าตัดหลักออก)
+  ❌ ผิด: "5402143338214" (เพิ่มหลัก — อย่าเพิ่มหลัก)
+  ✅ ถูก: "1540214[?]3814" (ถ้าอ่านหลักกลางไม่ชัด)
+  ✅ ถูก: "154021433814"  (ถ้าอ่านได้ครบชัดเจน)
+
+นับหลักให้ถูก:
+- Tax ID ต้องมี 13 หลักเสมอ (รวม [?]) — ถ้านับได้ไม่ครบ 13 แสดงว่าอ่านตก
+- Receipt No ของ Makro มี 11 หลัก และมักขึ้นต้นด้วย 1 — ถ้าได้น้อยกว่า 11 หลักแสดงว่าอ่านตก
+  เช่น "54021433814" = 11 หลัก ✅
+  เช่น "5402143814"  = 10 หลัก ❌ (ขาด 1 หลัก — ให้ใส่ [?] แทนหลักที่อ่านไม่ออก)
 
 ยอดรวมที่ถูกต้อง — สำคัญมาก:
 - ใช้ "รวมเงิน" (คอลัมน์ขวาสุดล่างสุด) = ยอดที่จ่ายจริง
@@ -1588,12 +1598,12 @@ function addRow(item = null) {
 }
 
 // Highlight any field containing [?] with orange border + badge
+// Also warn if tax ID digit count is wrong
 function highlightUncertain() {
-  // Clear previous
   document.querySelectorAll('.uncertain-field').forEach(el => el.classList.remove('uncertain-field'));
   document.querySelectorAll('.uncertain-badge').forEach(el => el.remove());
 
-  const fieldsToCheck = ['r_date', 'r_docno', 'r_vendor', 'r_taxid', 'r_note'];
+  const fieldsToCheck = ['r_date_display', 'r_docno', 'r_vendor', 'r_taxid', 'r_note'];
   fieldsToCheck.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -1606,7 +1616,33 @@ function highlightUncertain() {
     }
   });
 
-  // Also check item rows
+  // Tax ID digit count check (must be 13)
+  const taxEl = document.getElementById('r_taxid');
+  if (taxEl && taxEl.value) {
+    const digitCount = (taxEl.value.replace(/\[\?\]/g, 'X').match(/\d|X/g) || []).length;
+    if (digitCount > 0 && digitCount !== 13) {
+      taxEl.classList.add('uncertain-field');
+      const label = taxEl.closest('.form-field')?.querySelector('label');
+      if (label && !label.querySelector('.uncertain-badge')) {
+        label.insertAdjacentHTML('beforeend', `<span class="uncertain-badge">⚠️ ${digitCount} หลัก (ควรเป็น 13)</span>`);
+      }
+    }
+  }
+
+  // Receipt No digit count check (Makro = 12 digits)
+  const docEl = document.getElementById('r_docno');
+  if (docEl && docEl.value) {
+    const digitCount = (docEl.value.replace(/\[\?\]/g, 'X').match(/\d|X/g) || []).length;
+    if (digitCount > 0 && digitCount !== 12) {
+      docEl.classList.add('uncertain-field');
+      const label = docEl.closest('.form-field')?.querySelector('label');
+      if (label && !label.querySelector('.uncertain-badge')) {
+        label.insertAdjacentHTML('beforeend', `<span class="uncertain-badge">⚠️ ${digitCount} หลัก (ควรเป็น 12)</span>`);
+      }
+    }
+  }
+
+  // Item name [?] highlight
   document.querySelectorAll('#itemsBody tr').forEach(tr => {
     const nameInput = tr.querySelectorAll('input')[0];
     if (nameInput?.value?.includes('[?]')) {
