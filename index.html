@@ -86,6 +86,8 @@ body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-h
 .btn-green:hover { background: #238a5a; }
 .btn-ghost { background: transparent; color: var(--ink2); border: 1px solid var(--border); }
 .btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
+.doc-tb.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.doc-tb.active:hover { background: #333; }
 .btn-danger { background: rgba(232,69,69,0.1); color: var(--red); border: 1px solid rgba(232,69,69,0.2); }
 .btn-danger:hover { background: rgba(232,69,69,0.18); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
@@ -278,7 +280,15 @@ body { background: var(--bg); color: var(--ink); font-family: var(--sans); min-h
 .empty-icon { font-size: 40px; margin-bottom: 12px; }
 .empty-text { font-size: 14px; }
 
-.dup-warning {
+.uncertain-field {
+  border-color: var(--orange) !important;
+  background: rgba(245,158,11,0.06) !important;
+}
+.uncertain-badge {
+  font-size: 10px; font-weight: 700; color: var(--orange);
+  background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 4px; padding: 1px 6px; margin-left: 6px;
+}
   background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.4);
   border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
   font-size: 12px; color: #92620a; font-weight: 600; display: none;
@@ -451,15 +461,15 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
               <label>ชื่อร้าน / ผู้ขาย</label>
               <input type="text" id="r_vendor" placeholder="ชื่อร้านค้า" />
             </div>
-            <div class="form-field">
+            <div class="form-field full">
               <label>เลขภาษี</label>
               <input type="text" id="r_taxid" placeholder="0000000000000" />
             </div>
-            <div class="form-field">
-              <label>หมวดหมู่หลัก (อัตโนมัติจากรายการ)</label>
-              <input type="text" id="r_cat" placeholder="คำนวณจากรายการสินค้า" readonly style="color:var(--ink3)" />
-            </div>
           </div>
+          <!-- Hidden fields storing actual VAT/total from OCR — not recalculated -->
+          <input type="hidden" id="r_vat_actual" value="" />
+          <input type="hidden" id="r_total_actual" value="" />
+          <input type="hidden" id="r_cat" value="" />
           <hr class="divider">
           <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px;display:flex;align-items:center;gap:10px">
             รายการสินค้า (หมวดหมู่ต่อรายการ)
@@ -486,9 +496,9 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
           </div>
 
           <div class="sum-box">
-            <div class="sum-row"><span>ยอดรวมก่อนภาษี</span><span class="amt" id="s_sub">0.00</span></div>
-            <div class="sum-row"><span>VAT 7%</span><span class="amt" id="s_vat">0.00</span></div>
-            <div class="sum-row total"><span>ยอดสุทธิ</span><span class="amt" id="s_total">0.00</span></div>
+            <div class="sum-row"><span>ยอดรายการรวม</span><span class="amt" id="s_sub">0.00</span></div>
+            <div class="sum-row"><span>VAT (จากบิล)</span><span class="amt" id="s_vat">0.00</span></div>
+            <div class="sum-row total"><span>ยอดสุทธิ (จากบิล)</span><span class="amt" id="s_total">0.00</span></div>
           </div>
           <div class="form-field" style="margin-top:12px">
             <label>หมายเหตุ</label>
@@ -1158,6 +1168,27 @@ ${catList}
 - ชื่อร้าน: อ่านจาก "สาขาที่ XXXXX สาขา[ชื่อ]" ในหัวบิล ไม่ใช่เลขสาขาท้ายบิล
   เช่น "สาขาที่ 00149 สาขาปราจีนบุรี" → vendor = "Makro สาขาปราจีนบุรี"
 
+═══ กฎ [?] สำหรับตัวเลขที่อ่านไม่ชัด — สำคัญมาก ═══
+ใช้ [?] แทนทุกตัวอักษรหรือตัวเลขที่อ่านไม่แน่ใจ — ทั้งในชื่อสินค้าและในตัวเลข
+
+Tax ID (เลขภาษี 13 หลัก):
+- ถ้าอ่านตัวเลขใดไม่ชัด ให้ใส่ [?] แทนตัวนั้น
+- เช่น "010555410[?]980" แทนที่จะเดาว่า "0105554102980" หรือ "0105554102500"
+- ห้ามเดาตัวเลขที่มองไม่เห็นชัด — ผู้ใช้จะแก้ไขเองได้ง่ายกว่า
+
+Receipt No (เลขที่ใบเสร็จ):
+- ถ้าอ่านตัวเลขใดไม่ชัด ให้ใส่ [?] แทน
+- เช่น "5402143[?]814" แทนที่จะเดาตัวเลขที่เบลอ
+
+ตัวเลขราคา:
+- ถ้าอ่านราคาไม่ชัดเจน ให้ใส่ 0 และเพิ่ม note ว่า "ราคา [ชื่อสินค้า] อ่านไม่ชัด"
+- อย่าเดาราคา — ตัวเลขผิดทำให้บัญชีคลาดเคลื่อน
+
+ตัวอย่าง:
+  บิลจริง: TAX ID = 0105554102980 แต่หมึกเบลอที่หลักที่ 10-11
+  ✅ ถูก:  taxId = "010555410[?][?]80"
+  ❌ ผิด:  taxId = "0105554102500" (เดาตัวเลขที่มองไม่เห็น)
+
 ยอดรวมที่ถูกต้อง — สำคัญมาก:
 - ใช้ "รวมเงิน" (คอลัมน์ขวาสุดล่างสุด) = ยอดที่จ่ายจริง
 - "LEGAL AMOUNT" = ยอดก่อน VAT เท่านั้น — ห้ามใช้เป็น total
@@ -1467,7 +1498,11 @@ function fillForm(d) {
   document.getElementById('r_taxid').value  = d.taxId || '';
   document.getElementById('r_note').value   = d.note || '';
 
-  // Receipt-level category = dominant from items (read-only, auto)
+  // Store actual VAT and total from OCR — used in saveRecord and recalc display
+  document.getElementById('r_vat_actual').value   = d.vat   || '';
+  document.getElementById('r_total_actual').value = d.total || '';
+
+  // Store dominant category
   const dominant = getDominantCategory(d.items || []);
   document.getElementById('r_cat').value = dominant;
 
@@ -1480,7 +1515,7 @@ function fillForm(d) {
     warnEl.classList.remove('show');
   }
 
-  // Duplicate detection (now includes date)
+  // Duplicate detection
   const dupEl = document.getElementById('dupWarning');
   const dup = checkDuplicate(d.docNo, d.vendor, d.date);
   if (dup) {
@@ -1508,6 +1543,7 @@ function fillForm(d) {
   const items = d.items?.length ? d.items : [{ name: '', rawName: '', qty: 1, unit: 'ชิ้น', unitPrice: 0, amount: 0, category: '12-อื่นๆ' }];
   items.forEach(i => addRow(i));
   recalc();
+  highlightUncertain();
 }
 
 // ─── Add row (with per-item category) ────────────────────────────────────
@@ -1540,6 +1576,34 @@ function addRow(item = null) {
   document.getElementById('itemsBody').appendChild(tr);
 }
 
+// Highlight any field containing [?] with orange border + badge
+function highlightUncertain() {
+  // Clear previous
+  document.querySelectorAll('.uncertain-field').forEach(el => el.classList.remove('uncertain-field'));
+  document.querySelectorAll('.uncertain-badge').forEach(el => el.remove());
+
+  const fieldsToCheck = ['r_date', 'r_docno', 'r_vendor', 'r_taxid', 'r_note'];
+  fieldsToCheck.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.value && el.value.includes('[?]')) {
+      el.classList.add('uncertain-field');
+      const label = el.closest('.form-field')?.querySelector('label');
+      if (label && !label.querySelector('.uncertain-badge')) {
+        label.insertAdjacentHTML('beforeend', '<span class="uncertain-badge">⚠️ ตรวจสอบ</span>');
+      }
+    }
+  });
+
+  // Also check item rows
+  document.querySelectorAll('#itemsBody tr').forEach(tr => {
+    const nameInput = tr.querySelectorAll('input')[0];
+    if (nameInput?.value?.includes('[?]')) {
+      nameInput.classList.add('uncertain-field');
+    }
+  });
+}
+
 function escHtml(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
@@ -1553,7 +1617,7 @@ function recalcRow(input) {
   const amtInput = tr.querySelector('.row-amount');
   if (amtInput) {
     amtInput.value = (qty * up).toFixed(2);
-    amtInput.dataset.ocr = ''; // clear OCR lock — user is now editing manually
+    amtInput.dataset.ocr = '';
   }
   recalc();
 }
@@ -1564,32 +1628,35 @@ function recalc() {
   const catMap = {};
 
   document.querySelectorAll('#itemsBody tr').forEach(tr => {
-    const inputs = tr.querySelectorAll('input');
-    const catSel = tr.querySelector('select.item-cat');
+    const catSel  = tr.querySelector('select.item-cat');
     const amtInput = tr.querySelector('.row-amount');
-    // Use amount field directly — set by OCR or recalcRow, never override here
     const amt = parseFloat(amtInput?.value) || 0;
     sub += amt;
-
     if (catSel) {
       const c = catSel.value || '12-อื่นๆ';
       catMap[c] = (catMap[c] || 0) + amt;
     }
   });
 
-  const vat = sub * 0.07;
-  document.getElementById('s_sub').textContent   = fmt(sub);
-  document.getElementById('s_vat').textContent   = fmt(vat);
-  document.getElementById('s_total').textContent = fmt(sub + vat);
+  // Use actual VAT and total from OCR bill if available — never recalculate
+  const actualVat   = parseFloat(document.getElementById('r_vat_actual')?.value) || null;
+  const actualTotal = parseFloat(document.getElementById('r_total_actual')?.value) || null;
+  const displayVat   = actualVat   !== null ? actualVat   : sub * 0.07;
+  const displayTotal = actualTotal !== null ? actualTotal : sub + displayVat;
 
-  // Update dominant category in header field
+  document.getElementById('s_sub').textContent   = fmt(sub);
+  document.getElementById('s_vat').textContent   = fmt(displayVat);
+  document.getElementById('s_total').textContent = fmt(displayTotal);
+
+  // Update dominant category
   const entries = Object.entries(catMap).filter(([,v]) => v > 0);
   if (entries.length) {
     const dominant = entries.sort((a,b) => b[1]-a[1])[0][0];
-    document.getElementById('r_cat').value = dominant;
+    const catEl = document.getElementById('r_cat');
+    if (catEl) catEl.value = dominant;
   }
 
-  // Render category breakdown
+  // Category breakdown panel
   const breakdownEl = document.getElementById('catBreakdown');
   const rowsEl = document.getElementById('catBreakdownRows');
   if (entries.length > 1) {
@@ -1629,10 +1696,10 @@ async function saveRecord() {
   }).filter(i => i.name);
 
   const sub = items.reduce((s,i) => s + i.amount, 0);
-  // FIX: respect hasVat flag — only add VAT if the original bill had it
-  const hasVatField = document.getElementById('r_has_vat');
-  const hasVat = hasVatField ? hasVatField.checked : true; // default true for backward compat
-  const vat = hasVat ? sub * 0.07 : 0;
+  // Use actual VAT and total from OCR bill — never recalculate
+  const actualVat   = parseFloat(document.getElementById('r_vat_actual')?.value) || 0;
+  const actualTotal = parseFloat(document.getElementById('r_total_actual')?.value) || (sub + actualVat);
+  const hasVat = actualVat > 0;
   const dominantCat = getDominantCategory(items);
 
   const rec = {
@@ -1643,7 +1710,7 @@ async function saveRecord() {
     vendor:   document.getElementById('r_vendor').value,
     taxId:    document.getElementById('r_taxid').value,
     category: dominantCat,
-    items, subtotal: sub, vat, total: sub + vat,
+    items, subtotal: sub, vat: actualVat, total: actualTotal,
     note: document.getElementById('r_note').value,
     hasVat,
   };
