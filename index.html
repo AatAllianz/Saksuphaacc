@@ -644,6 +644,19 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
       </div>
       <div class="card section-gap">
         <div class="card-header">
+          <div class="card-title">🏪 Tax ID ตามร้านค้า</div>
+          <button class="btn btn-xs btn-orange" onclick="addVendorProfile()">+ เพิ่มร้านค้า</button>
+        </div>
+        <div class="card-body">
+          <div id="vendorProfileList"></div>
+          <div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.7">
+            💡 เมื่อ OCR อ่านชื่อร้านตรงกัน ระบบจะเติม Tax ID ให้อัตโนมัติ<br>
+            ชื่อร้านไม่ต้องตรงทั้งหมด — ใช้การ match บางส่วน เช่น "Makro" ครอบคลุมทุกสาขา
+          </div>
+        </div>
+      </div>
+      <div class="card section-gap">
+        <div class="card-header">
           <div class="card-title">📖 พจนานุกรมแก้ชื่อสินค้า</div>
           <button class="btn btn-xs btn-orange" onclick="addDictEntry()">+ เพิ่มคำแก้ไข</button>
         </div>
@@ -770,6 +783,7 @@ function loadConfig() {
   document.getElementById('cfg_sheetId').value = CFG.sheetId || '';
   document.getElementById('cfg_sheetKey').value = CFG.sheetKey || '';
   renderDict();
+  renderVendorProfiles();
 }
 function updateApiDot() {
   const ok = !!CFG.ant;
@@ -869,6 +883,66 @@ async function resizeForOCR(file) {
     img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
     img.src = url;
   });
+}
+
+let VENDOR_PROFILES = JSON.parse(localStorage.getItem('st_vendors') || '[]');
+
+function saveVendorProfiles() {
+  localStorage.setItem('st_vendors', JSON.stringify(VENDOR_PROFILES));
+}
+
+function renderVendorProfiles() {
+  const el = document.getElementById('vendorProfileList');
+  if (!el) return;
+  el.innerHTML = VENDOR_PROFILES.length
+    ? VENDOR_PROFILES.map((v, i) => `
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--surface2)">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">${v.name}</div>
+            <div style="font-size:11px;font-family:var(--mono);color:var(--ink3)">${v.taxId}</div>
+          </div>
+          <button class="btn btn-xs btn-ghost" onclick="editVendorProfile(${i})">✏️</button>
+          <button class="btn btn-xs btn-danger" onclick="delVendorProfile(${i})">🗑️</button>
+        </div>`).join('')
+    : '<div style="font-size:12px;color:var(--ink3)">ยังไม่มีร้านค้า — เพิ่ม Makro เป็นอันแรก</div>';
+}
+
+function addVendorProfile() {
+  const name = prompt('ชื่อร้านค้า (ใช้ match บางส่วน เช่น "Makro"):');
+  if (!name?.trim()) return;
+  const taxId = prompt('Tax ID (13 หลัก):');
+  if (!taxId?.trim()) return;
+  VENDOR_PROFILES.push({ name: name.trim(), taxId: taxId.trim() });
+  saveVendorProfiles();
+  renderVendorProfiles();
+  toast('✅ เพิ่มร้านค้าแล้ว', 's');
+}
+
+function editVendorProfile(i) {
+  const v = VENDOR_PROFILES[i];
+  const name = prompt('ชื่อร้านค้า:', v.name);
+  if (!name?.trim()) return;
+  const taxId = prompt('Tax ID:', v.taxId);
+  if (!taxId?.trim()) return;
+  VENDOR_PROFILES[i] = { name: name.trim(), taxId: taxId.trim() };
+  saveVendorProfiles();
+  renderVendorProfiles();
+  toast('✅ แก้ไขแล้ว', 's');
+}
+
+function delVendorProfile(i) {
+  VENDOR_PROFILES.splice(i, 1);
+  saveVendorProfiles();
+  renderVendorProfiles();
+  toast('🗑️ ลบแล้ว', 'i');
+}
+
+// Match vendor name against profiles (partial, case-insensitive)
+function lookupVendorTaxId(vendorName) {
+  if (!vendorName || !VENDOR_PROFILES.length) return null;
+  const lower = vendorName.toLowerCase();
+  const match = VENDOR_PROFILES.find(v => lower.includes(v.name.toLowerCase()) || v.name.toLowerCase().includes(lower.split(' ')[0]));
+  return match ? match.taxId : null;
 }
 
 // ─── Dictionary helpers ───────────────────────────────────────────────────
@@ -1573,6 +1647,12 @@ function fillForm(d) {
   document.getElementById('r_docno').value  = d.docNo || '';
   document.getElementById('r_vendor').value = d.vendor || '';
   document.getElementById('r_taxid').value  = d.taxId || '';
+
+  // Auto-fill tax ID from vendor profile if OCR got it wrong or missing
+  const profileTaxId = lookupVendorTaxId(d.vendor || '');
+  if (profileTaxId) {
+    document.getElementById('r_taxid').value = profileTaxId;
+  }
   document.getElementById('r_note').value   = d.note || '';
 
   // Store actual VAT and total from OCR — used in saveRecord and recalc display
