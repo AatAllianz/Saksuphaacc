@@ -1100,27 +1100,53 @@ ${catList}
 ═══ กฎ Makro — อ่านอย่างระมัดระวัง ═══
 
 โครงสร้างคอลัมน์ Makro (ซ้ายไปขวา):
-┌──────────────────────────────┬──────────┬────────────┬────────────┬───────────────────┐
-│ ARTICLE DESCRIPTION          │ QUANTITY │ UNIT PACKS │ PACK PRICE │ VALUE INCL.VAT    │
-│ (ชื่อสินค้า)                 │ OR WEIGHT│            │            │                   │
-└──────────────────────────────┴──────────┴────────────┴────────────┴───────────────────┘
+┌──────────────┬────────────────────────────┬──────────┬────────────┬────────────┬──────────┬───────────────────┐
+│ ARTICLE NO.  │ ARTICLE DESCRIPTION        │ QUANTITY │ UNIT PACKS │ PACK PRICE │ VAT CODE │ VALUE INCL.VAT    │
+│ (บาร์โค้ด)  │ (ชื่อสินค้า)               │ OR WEIGHT│            │            │          │ มูลค่ารวม VAT     │
+└──────────────┴────────────────────────────┴──────────┴────────────┴────────────┴──────────┴───────────────────┘
 
 คำอธิบายแต่ละคอลัมน์:
-- QUANTITY OR WEIGHT = จำนวนหน่วยที่ซื้อจริง → ใช้เป็น qty ใน JSON
-- UNIT PACKS = จำนวนชิ้นต่อแพ็ก (เช่น 1 แพ็ก = 12 ขวด) → ไม่ใช่ qty
-- PACK PRICE = ราคาต่อ 1 แพ็ก → ต้องหาร UNIT PACKS เพื่อได้ราคาต่อหน่วย
-- VALUE INCL. VAT = ยอดเงินรายการนั้น (รวม VAT แล้ว) → ใช้เป็น amount ใน JSON
+- ARTICLE NO.   = บาร์โค้ดสินค้า — ไม่ต้องใส่ใน JSON
+- QUANTITY OR WEIGHT = จำนวนหน่วยที่ซื้อจริง → ใช้เป็น qty (อาจเป็นทศนิยม เช่น 2.454 กก)
+- UNIT PACKS    = จำนวนชิ้นต่อแพ็ก หรือหน่วย (กก, EA, ชช) → ไม่ใช่ qty
+- PACK PRICE    = ราคาต่อ 1 แพ็ก → หาร UNIT PACKS เพื่อได้ราคาต่อหน่วย
+- VAT CODE      = รหัสภาษี: 1=ไม่มี VAT (สินค้าสด/เกษตร), 2=มี VAT 7%
+- VALUE INCL.VAT = ยอดเงินรายการ → ใช้เป็น amount
+  ตัวอักษรใดๆ ที่อยู่หลังตัวเลข (เช่น M, P, หรืออื่นๆ) ให้ตัดทิ้ง ใช้แค่ตัวเลข
+  เช่น "75.00 M" → amount = 75.00
 
 สูตรที่ถูกต้อง:
-  qty = QUANTITY OR WEIGHT (คอลัมน์แรก — เลขที่อยู่ซ้ายสุดของแถวสินค้า)
-  unitPrice = PACK PRICE ÷ UNIT PACKS
-  amount = VALUE INCL. VAT (อ่านจากบิลโดยตรง ห้ามคำนวณเอง)
+  qty       = QUANTITY OR WEIGHT (คอลัมน์แรกซ้ายสุด — อาจเป็นทศนิยม)
+  unitPrice = PACK PRICE ÷ UNIT PACKS (เป็นตัวเลข ไม่ใช่หน่วย)
+  amount    = VALUE INCL. VAT (อ่านจากบิลโดยตรง ห้ามคำนวณเอง — ตัด M ออกถ้ามี)
+  hasVat    = true ถ้า VAT CODE = 2, false ถ้า VAT CODE = 1
 
 กฎ qty — อ่านจากคอลัมน์เท่านั้น:
 - qty คือเลขในคอลัมน์ QUANTITY OR WEIGHT เท่านั้น
-- ตัวเลขในชื่อสินค้า (เช่น "300ก." "1X50" "24กรัม") ไม่ใช่ qty
+- qty อาจเป็นทศนิยม เช่น 2.454 สำหรับสินค้าที่ชั่งน้ำหนัก
+- ตัวเลขในชื่อสินค้า (เช่น "300ก." "1X50" "500-700ก.") ไม่ใช่ qty
 - UNIT PACKS ไม่ใช่ qty ไม่ว่าจะเป็นเลขอะไรก็ตาม
-- ตรวจสอบ: qty × unitPrice ≈ amount เสมอ ถ้าไม่ใช่ แสดงว่า qty ผิด
+- หน่วยใน UNIT PACKS (กก, EA, ชช, กล, ถง) ให้ใช้เป็น unit ใน JSON
+
+ตัวอย่างจากบิลจริง (3 รายการ):
+  ตัวอย่าง A — สินค้าสด ชั่งน้ำหนัก VAT CODE 1:
+  QTY: 2.454  ARTICLE: ปลาซ่อมกลาง 500-700ก. กก ละ  UNIT PACKS: 1 กก  PACK: 159.00  VAT:1  VALUE: 390.25
+  → qty=2.454, unit="กก", unitPrice=159.00, amount=390.25, category=01-อาหาร&เครื่องดื่ม ✅
+
+  ตัวอย่าง B — สินค้าแพ็ก VAT CODE 2:
+  QTY: 1  ARTICLE: %วิเมนนำเต ผ้าขนหนู 30x60 ขาว 1pc  UNIT PACKS: 1 EA  PACK: 159.00  VAT:2  VALUE: 159.00
+  → qty=1, unit="EA", unitPrice=159.00, amount=159.00, category=02-ห้องพัก ✅
+
+  ตัวอย่าง C — VALUE มีตัวอักษรต่อท้าย ให้ตัดทิ้ง:
+  QTY: 1  ARTICLE: วอลล์สตอเบอรี่ ซีเลคต้า 250กรัม  UNIT PACKS: 1 ชช  PACK: 75.00  VAT:2  VALUE: 75.00 M
+  → qty=1, unit="ชช", unitPrice=75.00, amount=75.00 (ตัด M ทิ้ง), category=01-อาหาร&เครื่องดื่ม ✅
+
+ยอดรวม Makro:
+- LEGAL AMOUNT = ยอดก่อน VAT แยกตาม VAT CODE (มีหลายบรรทัด)
+- ภาษี = VAT รวมทุกรายการที่มี VAT CODE 2
+- รวมเงิน = ยอดที่จ่ายจริง (= LEGAL AMOUNT TOTAL + ภาษีรวม) → ใช้เป็น total
+- subtotal = บรรทัด TOTAL ใน LEGAL AMOUNT
+- vat = บรรทัดภาษีรวม
 
 ตัวอย่างที่ 1 — ซื้อ 2 แพ็ก แต่ละแพ็กมี 1 ชิ้น:
   ARTICLE: ARO น้ำยาล้างจาน 800มล.
@@ -1196,16 +1222,20 @@ Tax ID ของ Makro ปราจีนบุรีที่เคยอ่า
   ✅ ถูก:    "010555410[?][?]80" หรือ "010555410298[?]" แล้วแต่หลักไหนไม่ชัด
 
 Receipt No ของบิลนี้:
-  ❌ ผิด: "5402143814"   (ขาดหลัก — อย่าตัดหลักออก)
-  ❌ ผิด: "5402143338214" (เพิ่มหลัก — อย่าเพิ่มหลัก)
+  ❌ ผิด: "5402143814"    (ขาดหลัก และไม่ขึ้นต้น 1)
+  ❌ ผิด: "28031465012"   (ขาดหลัก — ลืมเลข 1 จากตราประทับ)
   ✅ ถูก: "1540214[?]3814" (ถ้าอ่านหลักกลางไม่ชัด)
-  ✅ ถูก: "154021433814"  (ถ้าอ่านได้ครบชัดเจน)
+  ✅ ถูก: "154021433814"   (12 หลัก ขึ้นต้น 1)
+  ✅ ถูก: "128031465012"   (12 หลัก ขึ้นต้น 1)
 
 นับหลักให้ถูก:
 - Tax ID ต้องมี 13 หลักเสมอ (รวม [?]) — ถ้านับได้ไม่ครบ 13 แสดงว่าอ่านตก
-- Receipt No ของ Makro มี 11 หลัก และมักขึ้นต้นด้วย 1 — ถ้าได้น้อยกว่า 11 หลักแสดงว่าอ่านตก
-  เช่น "54021433814" = 11 หลัก ✅
-  เช่น "5402143814"  = 10 หลัก ❌ (ขาด 1 หลัก — ให้ใส่ [?] แทนหลักที่อ่านไม่ออก)
+- Receipt No ของ Makro มี 12 หลัก และขึ้นต้นด้วย 1 เสมอ
+  เลข 1 นำหน้ามาจากตราประทับ "STORE 1XX" ที่ทับชิดกับ RECEIPT NO.
+  เช่น "154021433814" = 12 หลัก ขึ้นต้น 1 ✅
+  เช่น "128031465012" = 12 หลัก ขึ้นต้น 1 ✅
+  ถ้าได้น้อยกว่า 12 หลัก แสดงว่าอ่านตก — ใส่ [?] แทนหลักที่หาย
+  ถ้าขึ้นต้นด้วยเลขอื่นที่ไม่ใช่ 1 แสดงว่าอ่าน % หรือตัวอื่นผิดเป็นตัวเลข
 
 ยอดรวมที่ถูกต้อง — สำคัญมาก:
 - ใช้ "รวมเงิน" (คอลัมน์ขวาสุดล่างสุด) = ยอดที่จ่ายจริง
@@ -1629,15 +1659,17 @@ function highlightUncertain() {
     }
   }
 
-  // Receipt No digit count check (Makro = 12 digits)
+  // Receipt No digit count check (Makro = 12 digits, starts with 1)
   const docEl = document.getElementById('r_docno');
   if (docEl && docEl.value) {
     const digitCount = (docEl.value.replace(/\[\?\]/g, 'X').match(/\d|X/g) || []).length;
-    if (digitCount > 0 && digitCount !== 12) {
+    const startsWithOne = docEl.value.trim().startsWith('1');
+    if (digitCount > 0 && (digitCount !== 12 || !startsWithOne)) {
       docEl.classList.add('uncertain-field');
       const label = docEl.closest('.form-field')?.querySelector('label');
       if (label && !label.querySelector('.uncertain-badge')) {
-        label.insertAdjacentHTML('beforeend', `<span class="uncertain-badge">⚠️ ${digitCount} หลัก (ควรเป็น 12)</span>`);
+        const msg = digitCount !== 12 ? `⚠️ ${digitCount} หลัก (ควรเป็น 12)` : `⚠️ ควรขึ้นต้นด้วย 1`;
+        label.insertAdjacentHTML('beforeend', `<span class="uncertain-badge">${msg}</span>`);
       }
     }
   }
