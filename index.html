@@ -430,6 +430,14 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
           <div class="ocr-warning" id="ocrWarning"></div>
           <div class="dup-warning" id="dupWarning"></div>
 
+          <!-- Doc type selector repeated here for convenience when result card is open -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:10px 12px;background:var(--surface2);border-radius:8px">
+            <span style="font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.6px">ประเภท:</span>
+            <button class="btn btn-xs btn-ghost doc-tb active" data-v="expense" onclick="setDocT(this)">💸 รายจ่าย</button>
+            <button class="btn btn-xs btn-ghost doc-tb" data-v="stock_in" onclick="setDocT(this)">📥 รับสินค้า</button>
+            <button class="btn btn-xs btn-ghost doc-tb" data-v="stock_out" onclick="setDocT(this)">📤 จ่ายสินค้า</button>
+          </div>
+
           <div class="ocr-grid" style="margin-bottom:16px">
             <div class="form-field">
               <label>วันที่</label>
@@ -1444,9 +1452,12 @@ function getCatLabel(catId) {
 
 // ─── Form fill ────────────────────────────────────────────────────────────
 function setDocT(el) {
-  document.querySelectorAll('.doc-tb').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  docType = el.dataset.v;
+  // Sync all doc-tb buttons (there are two sets — above and inside result card)
+  const v = el.dataset.v;
+  document.querySelectorAll('.doc-tb').forEach(b => {
+    b.classList.toggle('active', b.dataset.v === v);
+  });
+  docType = v;
 }
 
 function fillForm(d) {
@@ -1502,12 +1513,13 @@ function fillForm(d) {
 // ─── Add row (with per-item category) ────────────────────────────────────
 function addRow(item = null) {
   const tr = document.createElement('tr');
-  const rawName    = item?.rawName || item?.name || '';
+  const rawName     = item?.rawName || item?.name || '';
   const displayName = item?.name || '';
-  const showRaw = rawName && rawName !== displayName;
-  const itemCat = item?.category || '12-อื่นๆ';
+  const showRaw     = rawName && rawName !== displayName;
+  const itemCat     = item?.category || '12-อื่นๆ';
+  // Store original OCR amount — recalc only overrides if user edits qty/price
+  const ocrAmount   = item?.amount ?? 0;
 
-  // Build select with current value selected
   const selectHtml = `<select class="item-cat" onchange="recalc()">${
     CATEGORIES.map(c => `<option value="${c.id}"${c.id === itemCat ? ' selected' : ''}>${c.label}</option>`).join('')
   }</select>`;
@@ -1518,10 +1530,12 @@ function addRow(item = null) {
       ${showRaw ? `<span class="raw-name-tag" title="ชื่อบนบิล: ${escHtml(rawName)}">📄 ${escHtml(rawName)}</span>` : ''}
     </td>
     <td>${selectHtml}</td>
-    <td><input type="number" value="${item?.qty ?? 1}" min="0" step="0.01" oninput="recalc()" /></td>
+    <td><input type="number" value="${item?.qty ?? 1}" min="0" step="0.01" oninput="recalcRow(this)" /></td>
     <td><input type="text" value="${escHtml(item?.unit || 'ชิ้น')}" placeholder="หน่วย" /></td>
-    <td><input type="number" value="${item?.unitPrice ?? 0}" min="0" step="0.01" oninput="recalc()" /></td>
-    <td><input type="number" value="${item?.amount ?? 0}" readonly style="color:var(--ink2)" /></td>
+    <td><input type="number" value="${item?.unitPrice ?? 0}" min="0" step="0.01" oninput="recalcRow(this)" /></td>
+    <td><input type="number" class="row-amount" value="${ocrAmount.toFixed(2)}" min="0" step="0.01"
+         data-ocr="${ocrAmount}" oninput="recalc()"
+         style="color:var(--ink2)" title="คลิกเพื่อแก้ไข — จะคำนวณใหม่เมื่อเปลี่ยน จำนวน หรือ ราคา/หน่วย" /></td>
     <td><button class="btn-row-del" onclick="this.closest('tr').remove();recalc()">×</button></td>`;
   document.getElementById('itemsBody').appendChild(tr);
 }
@@ -1530,7 +1544,21 @@ function escHtml(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ─── Recalculate + category breakdown ────────────────────────────────────
+// Called when user edits qty or unitPrice — recalculates that row's amount
+function recalcRow(input) {
+  const tr = input.closest('tr');
+  const inputs = tr.querySelectorAll('input');
+  const qty = parseFloat(inputs[1].value) || 0;
+  const up  = parseFloat(inputs[3].value) || 0;
+  const amtInput = tr.querySelector('.row-amount');
+  if (amtInput) {
+    amtInput.value = (qty * up).toFixed(2);
+    amtInput.dataset.ocr = ''; // clear OCR lock — user is now editing manually
+  }
+  recalc();
+}
+
+// ─── Recalculate totals + category breakdown ──────────────────────────────
 function recalc() {
   let sub = 0;
   const catMap = {};
@@ -1538,13 +1566,11 @@ function recalc() {
   document.querySelectorAll('#itemsBody tr').forEach(tr => {
     const inputs = tr.querySelectorAll('input');
     const catSel = tr.querySelector('select.item-cat');
-    const qty = parseFloat(inputs[1].value) || 0;
-    const up  = parseFloat(inputs[3].value) || 0;
-    const amt = qty * up;
-    inputs[4].value = amt.toFixed(2);
+    const amtInput = tr.querySelector('.row-amount');
+    // Use amount field directly — set by OCR or recalcRow, never override here
+    const amt = parseFloat(amtInput?.value) || 0;
     sub += amt;
 
-    // Tally by category
     if (catSel) {
       const c = catSel.value || '12-อื่นๆ';
       catMap[c] = (catMap[c] || 0) + amt;
@@ -1589,15 +1615,16 @@ function toggleRaw() {
 async function saveRecord() {
   const rows = [...document.querySelectorAll('#itemsBody tr')];
   const items = rows.map(tr => {
-    const inputs = tr.querySelectorAll('input');
-    const catSel = tr.querySelector('select.item-cat');
+    const inputs  = tr.querySelectorAll('input');
+    const catSel  = tr.querySelector('select.item-cat');
+    const amtEl   = tr.querySelector('.row-amount');
     return {
       name:      inputs[0].value,
       category:  catSel ? catSel.value : '12-อื่นๆ',
       qty:       parseFloat(inputs[1].value)||0,
       unit:      inputs[2].value,
       unitPrice: parseFloat(inputs[3].value)||0,
-      amount:    parseFloat(inputs[4].value)||0,
+      amount:    parseFloat(amtEl?.value)||0,
     };
   }).filter(i => i.name);
 
