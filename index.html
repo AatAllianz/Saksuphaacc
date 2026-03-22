@@ -451,7 +451,11 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
           <div class="ocr-grid" style="margin-bottom:16px">
             <div class="form-field">
               <label>วันที่</label>
-              <input type="date" id="r_date" />
+              <!-- Display as DD/MM/YYYY — stored as YYYY-MM-DD in r_date_iso -->
+              <input type="text" id="r_date_display" placeholder="DD/MM/YYYY"
+                oninput="syncDateFromDisplay(this.value)"
+                style="font-family:var(--mono)" />
+              <input type="hidden" id="r_date" />
             </div>
             <div class="form-field">
               <label>เลขที่บิล / ใบเสร็จ</label>
@@ -469,6 +473,7 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; 
           <!-- Hidden fields storing actual VAT/total from OCR — not recalculated -->
           <input type="hidden" id="r_vat_actual" value="" />
           <input type="hidden" id="r_total_actual" value="" />
+          <input type="hidden" id="r_subtotal_actual" value="" />
           <input type="hidden" id="r_cat" value="" />
           <hr class="divider">
           <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px;display:flex;align-items:center;gap:10px">
@@ -1142,13 +1147,16 @@ ${catList}
   ❌ ผิด:  name="%AROเนยขาวต้องใช้ซื้อนี้ฟรมใน24ชั่วโมง" (แต่งชื่อขึ้นมาเอง)
   ❌ ผิด:  qty=50 (นั่นคือ UNIT PACKS ไม่ใช่ QUANTITY)
 
-ตัวอย่างที่ 5 — น้ำหนักในชื่อ ≠ qty:
+ตัวอย่างที่ 5 — UNIT PACKS=1 ≠ qty (กรณีที่สับสนบ่อยที่สุด):
   ARTICLE DESCRIPTION: เอโว่ วาซาบิผง 300 ก.
   QUANTITY OR WEIGHT: 2    UNIT PACKS: 1 กก    PACK PRICE: 115.00    VALUE: 230.00
   ✅ ถูก:  name="เอโว่ วาซาบิผง 300 ก.", qty=2, unitPrice=115.00, amount=230.00
-  ❌ ผิด:  qty=1 (นั่นคือ UNIT PACKS ไม่ใช่ QUANTITY)
-  ❌ ผิด:  qty=300 (นั่นคือน้ำหนักสินค้าในชื่อ ไม่ใช่ QUANTITY)
+  ❌ ผิด:  qty=1 (นั่นคือ UNIT PACKS=1 กก ไม่ใช่ QUANTITY — QUANTITY=2 อยู่คอลัมน์แรก)
+  ❌ ผิด:  qty=300 (นั่นคือน้ำหนักสินค้าในชื่อ)
   ❌ ผิด:  amount=115.00 (คำนวณ 1×115 เอง — ต้องอ่านจาก VALUE=230.00)
+
+  กฎ: แม้ UNIT PACKS จะเป็น 1 ก็ยังต้องอ่าน QUANTITY OR WEIGHT จากคอลัมน์แรก
+  QUANTITY OR WEIGHT=2 มาก่อน UNIT PACKS=1 เสมอในบิล Makro
 
 หน่วยพิเศษ Makro:
 - "ชช" = ชิ้น (unit สำหรับสินค้าชิ้นเดี่ยว)
@@ -1492,15 +1500,18 @@ function setDocT(el) {
 }
 
 function fillForm(d) {
-  document.getElementById('r_date').value   = d.date || new Date().toISOString().split('T')[0];
+  const isoDate = d.date || new Date().toISOString().split('T')[0];
+  document.getElementById('r_date').value         = isoDate;
+  document.getElementById('r_date_display').value = isoToDisplay(isoDate);
   document.getElementById('r_docno').value  = d.docNo || '';
   document.getElementById('r_vendor').value = d.vendor || '';
   document.getElementById('r_taxid').value  = d.taxId || '';
   document.getElementById('r_note').value   = d.note || '';
 
   // Store actual VAT and total from OCR — used in saveRecord and recalc display
-  document.getElementById('r_vat_actual').value   = d.vat   || '';
-  document.getElementById('r_total_actual').value = d.total || '';
+  document.getElementById('r_vat_actual').value      = d.vat      || '';
+  document.getElementById('r_total_actual').value    = d.total    || '';
+  document.getElementById('r_subtotal_actual').value = d.subtotal || '';
 
   // Store dominant category
   const dominant = getDominantCategory(d.items || []);
@@ -1604,6 +1615,25 @@ function highlightUncertain() {
   });
 }
 
+// Convert YYYY-MM-DD → DD/MM/YYYY for display
+function isoToDisplay(iso) {
+  if (!iso) return '';
+  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : iso;
+}
+// Convert DD/MM/YYYY → YYYY-MM-DD for storage
+function displayToIso(disp) {
+  if (!disp) return '';
+  const m = disp.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  // Already ISO?
+  if (/^\d{4}-\d{2}-\d{2}$/.test(disp)) return disp;
+  return disp;
+}
+function syncDateFromDisplay(val) {
+  document.getElementById('r_date').value = displayToIso(val);
+}
+
 function escHtml(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
@@ -1638,13 +1668,15 @@ function recalc() {
     }
   });
 
-  // Use actual VAT and total from OCR bill if available — never recalculate
-  const actualVat   = parseFloat(document.getElementById('r_vat_actual')?.value) || null;
-  const actualTotal = parseFloat(document.getElementById('r_total_actual')?.value) || null;
+  // Use actual figures from OCR bill — never recalculate
+  const actualSub   = parseFloat(document.getElementById('r_subtotal_actual')?.value) || null;
+  const actualVat   = parseFloat(document.getElementById('r_vat_actual')?.value)      || null;
+  const actualTotal = parseFloat(document.getElementById('r_total_actual')?.value)    || null;
+  const displaySub   = actualSub   !== null ? actualSub   : sub;
   const displayVat   = actualVat   !== null ? actualVat   : sub * 0.07;
   const displayTotal = actualTotal !== null ? actualTotal : sub + displayVat;
 
-  document.getElementById('s_sub').textContent   = fmt(sub);
+  document.getElementById('s_sub').textContent   = fmt(displaySub);
   document.getElementById('s_vat').textContent   = fmt(displayVat);
   document.getElementById('s_total').textContent = fmt(displayTotal);
 
@@ -1695,11 +1727,11 @@ async function saveRecord() {
     };
   }).filter(i => i.name);
 
-  const sub = items.reduce((s,i) => s + i.amount, 0);
-  // Use actual VAT and total from OCR bill — never recalculate
-  const actualVat   = parseFloat(document.getElementById('r_vat_actual')?.value) || 0;
-  const actualTotal = parseFloat(document.getElementById('r_total_actual')?.value) || (sub + actualVat);
-  const hasVat = actualVat > 0;
+  const itemsSum    = items.reduce((s,i) => s + i.amount, 0);
+  const actualSub   = parseFloat(document.getElementById('r_subtotal_actual')?.value) || itemsSum;
+  const actualVat   = parseFloat(document.getElementById('r_vat_actual')?.value)      || 0;
+  const actualTotal = parseFloat(document.getElementById('r_total_actual')?.value)    || (actualSub + actualVat);
+  const hasVat      = actualVat > 0;
   const dominantCat = getDominantCategory(items);
 
   const rec = {
@@ -1710,7 +1742,7 @@ async function saveRecord() {
     vendor:   document.getElementById('r_vendor').value,
     taxId:    document.getElementById('r_taxid').value,
     category: dominantCat,
-    items, subtotal: sub, vat: actualVat, total: actualTotal,
+    items, subtotal: actualSub, vat: actualVat, total: actualTotal,
     note: document.getElementById('r_note').value,
     hasVat,
   };
@@ -2119,7 +2151,9 @@ const toB64 = f => new Promise((res, rej) => {
 });
 
 // Init
-document.getElementById('r_date').value = new Date().toISOString().split('T')[0];
+const _today = new Date().toISOString().split('T')[0];
+document.getElementById('r_date').value         = _today;
+document.getElementById('r_date_display').value = isoToDisplay(_today);
 updateBadges(); renderDash();
 </script>
 </body>
